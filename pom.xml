@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.infinispan.images</groupId>
+    <artifactId>infinispan-images-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>Parent</name>
+    <description>Infinispan Images Parent POM</description>
+    <url>https://github.com/infinispan/infinispan-image-artifacts</url>
+
+    <licenses>
+        <license>
+            <name>Apache License 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>placeholder</id>
+            <name>See https://github.com/infinispan/images/graphs/contributors for a complete list of
+                contributors
+            </name>
+        </developer>
+    </developers>
+
+    <ciManagement>
+        <system>Jenkins</system>
+        <url>https://ci.infinispan.org</url>
+    </ciManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>${jboss.releases.repo.id}</id>
+            <name>JBoss Release Repository</name>
+            <url>${jboss.releases.repo.url}</url>
+        </repository>
+    </distributionManagement>
+
+    <issueManagement>
+        <system>jira</system>
+        <url>https://issues.jboss.org/browse/ISPN</url>
+    </issueManagement>
+
+    <scm>
+        <connection>scm:git:git@github.com:infinispan/infinispan-image-artifacts.git</connection>
+        <developerConnection>scm:git:git@github.com:infinispan/infinispan-image-artifacts.git</developerConnection>
+        <url>https://github.com/infinispan/infinispan-image-artifacts</url>
+    </scm>
+
+    <modules>
+        <module>config-generator</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+
+        <jboss.releases.repo.id>jboss-releases-repository</jboss.releases.repo.id>
+        <jboss.releases.nexus.url>https://repository.jboss.org/nexus</jboss.releases.nexus.url>
+        <jboss.releases.repo.url>${jboss.releases.nexus.url}/service/local/staging/deploy/maven2/
+        </jboss.releases.repo.url>
+
+        <version.groovy>2.5.7</version.groovy>
+        <version.snakeyaml>1.23</version.snakeyaml>
+        <version.substrate>19.1.1</version.substrate>
+        <version.maven.buildhelper>1.8</version.maven.buildhelper>
+        <version.maven.assembly.plugin>3.1.1</version.maven.assembly.plugin>
+        <version.maven.compiler.plugin>3.8.0</version.maven.compiler.plugin>
+        <version.maven.groovy.eclipse.compiler>2.9.2-01</version.maven.groovy.eclipse.compiler>
+        <version.maven.groovy.eclipse.batch>2.5.6-01</version.maven.groovy.eclipse.batch>
+        <version.maven.nexus-staging>1.6.8</version.maven.nexus-staging>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>${version.maven.nexus-staging}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <nexusUrl>${jboss.releases.nexus.url}</nexusUrl>
+                    <serverId>${jboss.releases.repo.id}</serverId>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

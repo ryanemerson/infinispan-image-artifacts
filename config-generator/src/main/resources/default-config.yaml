@@ -1,0 +1,20 @@
+infinispan:
+  clusterName: infinispan
+endpoints:
+  hotrod:
+    enabled: true
+    qup: auth
+    serverName: infinispan
+  memcached:
+    enabled: false
+  rest:
+    enabled: true
+jgroups:
+  transport: tcp
+  dnsPing:
+    address: ""
+    recordType: A
+keystore:
+  alias: server
+xsite:
+  masterCandidate: true
