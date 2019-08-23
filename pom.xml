@@ -77,11 +77,17 @@
         <version.maven.groovy.eclipse.compiler>2.9.2-01</version.maven.groovy.eclipse.compiler>
         <version.maven.groovy.eclipse.batch>2.5.6-01</version.maven.groovy.eclipse.batch>
         <version.maven.nexus-staging>1.6.8</version.maven.nexus-staging>
+        <version.maven.source>3.0.1</version.maven.source>
     </properties>
 
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${version.maven.source}</version>
+                </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
                     <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -99,6 +105,21 @@
                     <serverId>${jboss.releases.repo.id}</serverId>
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar</goal>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <inherited>true</inherited>
             </plugin>
         </plugins>
     </build>
