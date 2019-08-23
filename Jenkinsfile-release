@@ -1,0 +1,84 @@
+#!/usr/bin/env groovy
+
+pipeline {
+    agent {
+        label 'slave-group-release'
+    }
+
+    parameters {
+        string(name: 'version', defaultValue: '', description: 'Release version')
+        string(name: 'nextVersion', defaultValue: '', description: 'Next release version (blank to stay on existing SNAPSHOT')
+        booleanParam(name: 'dryRun', defaultValue: false, description: 'If true, we don\'t deploy to nexus')
+        gitParameter(name: 'branch', defaultValue: 'origin/master', branchFilter: 'origin/(.*)', type: 'PT_BRANCH', description: 'Branch to release from')
+    }
+
+    stages {
+        stage('Prepare') {
+            steps {
+                script {
+                    env.MAVEN_HOME = tool('Maven')
+                    env.MAVEN_OPTS = "-Xmx1g -XX:+HeapDumpOnOutOfMemoryError"
+                    env.JAVA_HOME = tool('JDK 11')
+                }
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                sh "git checkout ${params.branch}"
+            }
+        }
+
+        stage('Version') {
+            when {
+                expression { params.nextVersion != '' }
+            }
+            steps {
+                sh "$MAVEN_HOME/bin/mvn -B -V versions:set -DnewVersion=${params.version} -DprocessAllModules=true"
+            }
+        }
+
+        stage('Deploy') {
+            when {
+                expression { !params.dryRun }
+            }
+            steps {
+                sh "$MAVEN_HOME/bin/mvn -B -V -DskipTests clean deploy"
+            }
+        }
+
+        stage('Tag') {
+            steps {
+                sh "$MAVEN_HOME/bin/mvn -B -V scm:checkin -Dmessage=\"Releasing version ${params.version}\" -DpushChanges=false"
+                sh "$MAVEN_HOME/bin/mvn -B -V scm:tag -Dtag=${params.version}"
+            }
+        }
+
+        stage('Next version') {
+            when {
+                expression { params.nextVersion != '' }
+            }
+            steps {
+                script {
+                    sh "$MAVEN_HOME/bin/mvn -B -V versions:set -DnewVersion=${params.nextVersion} -DprocessAllModules=true"
+                    sh "$MAVEN_HOME/bin/mvn -B -V -Dmessage='Next version ${params.nextVersion}' -DscmVersion=${params.branch} -DscmVersionType=branch scm:checkin"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'git clean -fdx -e "*.hprof" || echo "git clean failed, exit code $?"'
+        }
+        failure {
+            echo "post build status: failure"
+            emailext to: '${DEFAULT_RECIPIENTS}', subject: '${DEFAULT_SUBJECT}', body: '${DEFAULT_CONTENT}'
+        }
+
+        success {
+            echo "post build status: success"
+            emailext to: '${DEFAULT_RECIPIENTS}', subject: '${DEFAULT_SUBJECT}', body: '${DEFAULT_CONTENT}'
+        }
+    }
+}
