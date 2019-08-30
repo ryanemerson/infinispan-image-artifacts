@@ -1,5 +1,8 @@
 package org.infinispan.images
 
+
+import groovy.text.SimpleTemplateEngine
+import groovy.text.TemplateEngine
 import groovy.text.XmlTemplateEngine
 import org.yaml.snakeyaml.Yaml
 
@@ -24,10 +27,17 @@ static void exec(String cmd) {
     if (exitValue) System.exit exitValue
 }
 
-static void processTemplate(String templateName, String dest, Map binding) {
+static void proccessXmlTemplate(String templateName, String dest, Map binding) {
+    processTemplate new XmlTemplateEngine(), templateName, dest, binding
+}
+
+static void processPropertiesTemplate(String templateName, String dest, Map binding) {
+    processTemplate new SimpleTemplateEngine(), templateName, dest, binding
+}
+
+static void processTemplate(TemplateEngine engine, String templateName, String dest, Map binding) {
     String template = ConfigGenerator.classLoader.getResourceAsStream(templateName).text
-    new XmlTemplateEngine()
-            .createTemplate(template)
+    engine.createTemplate(template)
             .make(binding)
             .writeTo(new File(dest).newWriter())
 }
@@ -93,9 +103,12 @@ createKeystore configYaml.keystore, outputDir
 
 // Generate JGroups stack files
 def transport = configYaml.jgroups.transport
-processTemplate "jgroups-${transport}.xml", "${outputDir}jgroups-${transport}.xml", configYaml
-if (configYaml.xsite?.backups) processTemplate "jgroups-relay.xml", "${outputDir}jgroups-relay.xml", configYaml
+proccessXmlTemplate "jgroups-${transport}.xml", "${outputDir}jgroups-${transport}.xml", configYaml
+if (configYaml.xsite?.backups) proccessXmlTemplate "jgroups-relay.xml", "${outputDir}jgroups-relay.xml", configYaml
 
 
 // Generate Infinispan configuration
-processTemplate 'infinispan.xml', "${outputDir}infinispan.xml", configYaml
+proccessXmlTemplate 'infinispan.xml', "${outputDir}infinispan.xml", configYaml
+
+// Generate Logging configuration
+processPropertiesTemplate 'logging.properties', "${outputDir}logging.properties", configYaml
