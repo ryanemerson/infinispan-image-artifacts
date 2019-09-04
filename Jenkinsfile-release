@@ -43,7 +43,9 @@ pipeline {
                 expression { !params.dryRun }
             }
             steps {
-                sh "$MAVEN_HOME/bin/mvn -B -V -DskipTests clean deploy"
+                configFileProvider([configFile(fileId: 'maven-settings-with-deploy-release', variable: 'MAVEN_SETTINGS')]) {
+                    sh "$MAVEN_HOME/bin/mvn -B -V -s '$MAVEN_SETTINGS' -DskipTests clean deploy"
+                }
             }
         }
 
