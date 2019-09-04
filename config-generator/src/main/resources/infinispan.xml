@@ -35,14 +35,9 @@
         <security>
             <security-realms>
                 <security-realm name="default">
-                    <properties-realm groups-attribute="Roles">
-                        <user-properties path="users.properties" relative-to="infinispan.server.config.path" plain-text="true"/>
-                        <group-properties path="groups.properties" relative-to="infinispan.server.config.path"/>
-                    </properties-realm>
-
                     <gsp:scriptlet>
                         <![CDATA[
-                        if (hasProperty('keystore') && keystore.path) {
+                        if (keystore && keystore.path) {
                         ]]>
                     </gsp:scriptlet>
                     <server-identities>
@@ -53,6 +48,10 @@
                     <gsp:scriptlet>
                         }
                     </gsp:scriptlet>
+                    <properties-realm groups-attribute="Roles">
+                        <user-properties path="users.properties" relative-to="infinispan.server.config.path" plain-text="true"/>
+                        <group-properties path="groups.properties" relative-to="infinispan.server.config.path"/>
+                    </properties-realm>
                 </security-realm>
             </security-realms>
         </security>
