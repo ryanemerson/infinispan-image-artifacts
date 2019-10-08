@@ -42,23 +42,40 @@ static void processTemplate(TemplateEngine engine, String templateName, String d
             .writeTo(new File(dest).newWriter())
 }
 
-static void createKeystore(ks, String outputDir) {
-    if (ks?.crtPath == null) return
+static void configureKeystore(ks, String outputDir) {
+    if (!ks.path?.trim() && !ks.crtPath?.trim()) {
+        if ( ks.selfSignCert) {
+            ks.password = "infinispan"
+            ks.path = "${outputDir}selfsigned_keystore.p12"
+            ks.alias = "server"
+        }
+        return
+    }
 
+    // If path is defined then ignore selfSignCert
+    ks.selfSignCert = false
+
+    // If ks.path == null then use default for keystore
     def ksRoot = ks.path == null ? new File("${outputDir}keystores") : new File(ks.path).parentFile
     ksRoot.mkdirs()
     ksRoot = addSeparator ksRoot.getAbsolutePath()
-    String crtSrc = addSeparator((String) ks.crtPath)
-    String ksPkcs = "${ksRoot}keystore.pkcs12"
 
-    // Add values to the map so they can be used in the templates
-    ks.path = ks.path ?: "${ksRoot}keystore.p12"
-    ks.password = ks.password ?: "infinispan"
+    // If user provides a key/cert in ks.crtPath then build
+    // a keystore from them and store it in ks.path (overwriting
+    // any eventual content in ks.path)
+    if (ks.crtPath != null) {
+        String crtSrc = addSeparator((String) ks.crtPath)
+        String ksPkcs = "${ksRoot}keystore.pkcs12"
 
-    exec "openssl pkcs12 -export -inkey ${crtSrc}tls.key -in ${crtSrc}tls.crt -out ${ksPkcs} -name ${ks.alias} -password pass:${ks.password}"
+        // Add values to the map so they can be used in the templates
+        ks.path = ks.path ?: "${ksRoot}keystore.p12"
+        ks.password = ks.password ?: "infinispan"
 
-    exec "keytool -importkeystore -noprompt -srckeystore ${ksPkcs} -srcstoretype pkcs12 -srcstorepass ${ks.password} -srcalias ${ks.alias} " +
+        exec "openssl pkcs12 -export -inkey ${crtSrc}tls.key -in ${crtSrc}tls.crt -out ${ksPkcs} -name ${ks.alias} -password pass:${ks.password}"
+
+        exec "keytool -importkeystore -noprompt -srckeystore ${ksPkcs} -srcstoretype pkcs12 -srcstorepass ${ks.password} -srcalias ${ks.alias} " +
             "-destalias ${ks.alias} -destkeystore ${ks.path} -deststoretype pkcs12 -storepass ${ks.password}"
+    }
 }
 
 static void processCredentials(credentials, String outputDir, realm = "default") {
@@ -98,9 +115,7 @@ defaultConfig.jgroups.bindAddress = InetAddress.localHost.hostAddress
 // If no user config then use defaults, otherwise load user config and add default values for missing elements
 Map configYaml = args.length == 2 ? defaultConfig : mergeMaps(defaultConfig, new Yaml().load(new File(args[2]).newInputStream()))
 
-// Create Keystore if required
-createKeystore configYaml.keystore, outputDir
-
+configureKeystore configYaml.keystore, outputDir
 // Generate JGroups stack files
 def transport = configYaml.jgroups.transport
 proccessXmlTemplate "jgroups-${transport}.xml", "${outputDir}jgroups-${transport}.xml", configYaml

@@ -16,6 +16,7 @@ jgroups:
     recordType: A
 keystore:
   alias: server
+  selfSignCert: false
 xsite:
   masterCandidate: true
 

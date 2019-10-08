@@ -38,11 +38,12 @@
                     <gsp:scriptlet>
                         <![CDATA[
                         if (keystore && keystore.path) {
+                            def selfSignAttr = keystore.selfSignCert ? "localhost" : ""
                         ]]>
                     </gsp:scriptlet>
                     <server-identities>
                         <ssl>
-                            <keystore path="${keystore.path}" keystore-password="${keystore.password}" alias="${keystore.alias}"/>
+                            <keystore path="${keystore.path}" alias="${keystore.alias}" keystore-password="${keystore.password}" generate-self-signed-certificate-host="${selfSignAttr}"/>
                         </ssl>
                     </server-identities>
                     <gsp:scriptlet>
