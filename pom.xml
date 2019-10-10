@@ -6,7 +6,7 @@
 
     <groupId>org.infinispan.images</groupId>
     <artifactId>infinispan-images-parent</artifactId>
-    <version>0.0.3.Final</version>
+    <version>0.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Parent</name>
