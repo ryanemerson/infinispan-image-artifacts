@@ -6,11 +6,11 @@
     <parent>
         <groupId>org.infinispan.images</groupId>
         <artifactId>infinispan-images-parent</artifactId>
-        <version>0.0.3-SNAPSHOT</version>
+        <version>0.0.3.Final</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>config-generator</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.3.Final</version>
 
     <properties>
         <mainClass>org.infinispan.images.ConfigGenerator</mainClass>
