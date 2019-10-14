@@ -6,6 +6,8 @@ import groovy.text.TemplateEngine
 import groovy.text.XmlTemplateEngine
 import org.yaml.snakeyaml.Yaml
 
+import java.security.MessageDigest
+
 static Map mergeMaps(Map lhs, Map rhs) {
     rhs.each { k, v -> lhs[k] = lhs[k] in Map ? mergeMaps(lhs[k], v) : v }
     lhs
@@ -85,10 +87,13 @@ static void processCredentials(credentials, String outputDir, realm = "default")
     credentials.each { c ->
         if (!c.username || !c.password) printErrorAndExit "Credential identities require both a 'username' and 'password'"
 
-//        TODO store password as md5 when probes can utilise internal rest endpoint
-//        MessageDigest md5 = MessageDigest.getInstance "MD5"
-//        String hash = md5.digest("${c.username}:${realm}:${c.password}".getBytes("UTF-8")).encodeHex().toString()
-        users.put c.username, c.password
+        if (c.preDigestedPassword) {
+            users.put c.username, c.password
+        } else {
+            MessageDigest md5 = MessageDigest.getInstance "MD5"
+            String hash = md5.digest("${c.username}:${realm}:${c.password}".getBytes("UTF-8")).encodeHex().toString()
+            users.put c.username, hash
+        }
 
         if (c.roles) groups.put c.username, c.roles.join(",")
     }
