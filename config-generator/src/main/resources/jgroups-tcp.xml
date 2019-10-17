@@ -1,7 +1,7 @@
 <config xmlns="urn:org:jgroups"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="urn:org:jgroups http://www.jgroups.org/schema/jgroups-4.0.xsd"
-        xmlns:gsp='http://groovy.codehaus.org/2005/gsp'>
+        xmlns:gsp="http://groovy.codehaus.org/2005/gsp">
     <TCP bind_addr="${jgroups.bindAddress}"
          bind_port="7800"
          enable_diagnostics="false"
@@ -69,20 +69,4 @@
             min_threshold="0.40"
     />
     <FRAG3/>
-
-    <gsp:scriptlet>
-        if (xsite?.backups) {
-    </gsp:scriptlet>
-    <relay site="${xsite.name}">
-        <gsp:scriptlet>
-            xsite.backups.each { backup->
-        </gsp:scriptlet>
-        <remote-site name="${backup.name}" stack="relay-global" cluster="global"/>
-        <gsp:scriptlet>
-            }
-        </gsp:scriptlet>
-        <property name="max_site_masters">1000</property>
-        <property name="can_become_site_master">${xsite.masterCandidate}</property>
-    </relay>
-    <gsp:scriptlet>}</gsp:scriptlet>
 </config>

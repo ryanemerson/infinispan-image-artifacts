@@ -1,21 +1,41 @@
 <infinispan
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="urn:infinispan:config:10.0 http://www.infinispan.org/schemas/infinispan-config-10.0.xsd
-                            urn:infinispan:server:10.0 http://www.infinispan.org/schemas/infinispan-server-10.0.xsd"
+                            urn:infinispan:server:10.0 http://www.infinispan.org/schemas/infinispan-server-10.0.xsd
+                            urn:org:jgroups http://www.jgroups.org/schema/jgroups-4.0.xsd"
         xmlns="urn:infinispan:config:10.0"
         xmlns:server="urn:infinispan:server:10.0"
-        xmlns:gsp='http://groovy.codehaus.org/2005/gsp'>
+        xmlns:gsp="http://groovy.codehaus.org/2005/gsp"
+        xmlns:jgroups="urn:org.jgroups">
 
     <jgroups>
         <stack-file name="image-${jgroups.transport}" path="jgroups-${jgroups.transport}.xml"/>
 
-        <gsp:scriptlet>if (xsite?.backups) {</gsp:scriptlet>
+        <gsp:scriptlet>
+            boolean hasXSite = xsite?.backups
+            def stack = hasXSite? "xsite" : "image-${jgroups.transport}"
+            if (hasXSite) {
+        </gsp:scriptlet>
         <stack-file name="relay-global" path="jgroups-relay.xml"/>
+
+        <stack name="xsite" extends="image-${jgroups.transport}">
+            <jgroups:relay.RELAY2 site="${xsite.name}" max_site_masters="1000" can_become_site_master="${xsite.masterCandidate}"/>
+            <remote-sites default-stack="relay-global">
+                <remote-site name="${xsite.name}"/>
+                <gsp:scriptlet>
+                    xsite.backups.each { backup->
+                </gsp:scriptlet>
+                <remote-site name="${backup.name}"/>
+                <gsp:scriptlet>
+                    }
+                </gsp:scriptlet>
+            </remote-sites>
+        </stack>
         <gsp:scriptlet>}</gsp:scriptlet>
     </jgroups>
 
     <cache-container>
-        <transport cluster="${infinispan.clusterName}" stack="image-${jgroups.transport}"/>
+        <transport cluster="${infinispan.clusterName}" stack="${stack}"/>
     </cache-container>
 
     <server xmlns="urn:infinispan:server:10.0">
