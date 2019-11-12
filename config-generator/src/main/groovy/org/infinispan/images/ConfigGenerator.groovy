@@ -1,6 +1,6 @@
 package org.infinispan.images
 
-
+import groovy.cli.picocli.CliBuilder
 import groovy.text.SimpleTemplateEngine
 import groovy.text.TemplateEngine
 import groovy.text.XmlTemplateEngine
@@ -101,24 +101,35 @@ static void processCredentials(credentials, String outputDir, realm = "default")
     groups.store new File("${outputDir}groups.properties").newWriter(), null
 }
 
-static void processIdentities(Map identities, String outputDir) {
+static void processIdentities(String identityFile, String outputDir) {
+    if (!identityFile)
+        return
+
+    def identities = new Yaml().load(new File(identityFile).newInputStream())
     processCredentials identities.credentials, outputDir
 }
 
-if (args.length < 2) printErrorAndExit 'Usage: OUTPUT_DIR IDENTITIES_YAML <CONFIG_YAML>'
+def cli = new CliBuilder(usage:'config-generator [options] output-dir', stopAtNonOption: false)
+cli.setErrorWriter(new PrintWriter(System.err))
+cli._(longOpt: 'identities', args:1, argName:'file', 'Yaml file used to initialize identities')
+cli._(longOpt: 'config', args:1, argName:'file', 'Yaml file used to generate Infinispan configuration')
 
-def outputDir = addSeparator args[0]
-Map identitiesYaml = new Yaml().load(new File(args[1]).newInputStream())
+def options = cli.parse(args)
+if (!options || options.arguments().isEmpty() || options.arguments().size() != 1)
+    System.exit 1
+
+def outputDir = addSeparator options.arguments().get(0)
 Map defaultConfig = new Yaml().load(ConfigGenerator.classLoader.getResourceAsStream('default-config.yaml'))
 
-// Process Identities
-processIdentities identitiesYaml, outputDir
+// Process Identities if provided
+if (options.identities)
+    processIdentities options.identities, outputDir
 
 // Add bindAddress to defaults
 defaultConfig.jgroups.bindAddress = InetAddress.localHost.hostAddress
 
 // If no user config then use defaults, otherwise load user config and add default values for missing elements
-Map configYaml = args.length == 2 ? defaultConfig : mergeMaps(defaultConfig, new Yaml().load(new File(args[2]).newInputStream()))
+Map configYaml = !options.config ? defaultConfig : mergeMaps(defaultConfig, new Yaml().load(new File(options.config).newInputStream()))
 
 configureKeystore configYaml.keystore, outputDir
 // Generate JGroups stack files
