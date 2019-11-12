@@ -25,6 +25,12 @@
 
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-cli-picocli</artifactId>
+            <version>${version.groovy}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-templates</artifactId>
             <version>${version.groovy}</version>
         </dependency>
