@@ -13,7 +13,7 @@
     <version>1.1.0-SNAPSHOT</version>
 
     <properties>
-        <mainClass>org.infinispan.images.ConfigGenerator</mainClass>
+        <mainClass>org.infinispan.images.Main</mainClass>
     </properties>
 
     <dependencies>
@@ -39,6 +39,13 @@
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>${version.snakeyaml}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-test</artifactId>
+            <version>${version.groovy}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -81,6 +88,18 @@
                             </sources>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>add-test-source</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/test/groovy</source>
+                            </sources>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -106,6 +125,17 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${version.maven.surefire}</version>
+                <configuration>
+                    <failIfNoTests>true</failIfNoTests>
+                    <includes>
+                        <include>**/*Test*.*</include>
+                    </includes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

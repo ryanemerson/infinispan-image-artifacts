@@ -78,6 +78,7 @@
         <version.maven.groovy.eclipse.batch>2.5.6-01</version.maven.groovy.eclipse.batch>
         <version.maven.nexus-staging>1.6.8</version.maven.nexus-staging>
         <version.maven.source>3.0.1</version.maven.source>
+        <version.maven.surefire>3.0.0-M3</version.maven.surefire>
     </properties>
 
     <build>
