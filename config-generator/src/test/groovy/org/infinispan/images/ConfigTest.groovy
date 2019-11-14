@@ -61,6 +61,18 @@ class ConfigTest {
     }
 
     @Test
+    void testRestAuthDisabled() {
+        createConfig '''
+            |endpoints:
+            |  rest:
+            |    auth: false
+            '''
+        def ispn = ispnXml()
+        assert !ispn.server.endpoints[REST_ENDPOINT].isEmpty()
+        assert ispn.server.endpoints[REST_ENDPOINT].authentication.isEmpty()
+    }
+
+    @Test
     void testHotRodAuthEnabledByDefault() {
         createConfig()
         def ispn = ispnXml()
@@ -77,6 +89,18 @@ class ConfigTest {
             |    enabled: false
             '''
         assert ispnXml().server.endpoints[HOTROD_ENDPOINT].isEmpty()
+    }
+
+    @Test
+    void testHotRodAuthDisabled() {
+        createConfig '''
+            |endpoints:
+            |  hotrod:
+            |    auth: false
+            '''
+        def ispn = ispnXml()
+        assert !ispn.server.endpoints[HOTROD_ENDPOINT].isEmpty()
+        assert ispn.server.endpoints[HOTROD_ENDPOINT].authentication.isEmpty()
     }
 
     @Test
