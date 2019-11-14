@@ -2,12 +2,14 @@ infinispan:
   clusterName: infinispan
 endpoints:
   hotrod:
+    auth: true
     enabled: true
     qop: auth
     serverName: infinispan
   memcached:
     enabled: false
   rest:
+    auth: true
     enabled: true
 jgroups:
   transport: tcp
