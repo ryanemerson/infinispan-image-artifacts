@@ -8,6 +8,9 @@ import org.yaml.snakeyaml.Yaml
 
 class ConfigTest {
 
+    private static final String HOTROD_ENDPOINT = 'hotrod-connector'
+    private static final String MEMCACHED_ENDPOINT = 'memcached-connector'
+    private static final String REST_ENDPOINT = 'rest-connector'
     static File outputDir;
 
     @BeforeClass
@@ -25,7 +28,7 @@ class ConfigTest {
     @Test
     void testMemcachedDisabledByDefault() {
         createConfig()
-        assert ispnXml().server.endpoints['memcached-connector'].isEmpty()
+        assert ispnXml().server.endpoints[MEMCACHED_ENDPOINT].isEmpty()
     }
 
     @Test
@@ -35,25 +38,45 @@ class ConfigTest {
             |  memcached:
             |    enabled: true
             '''
-        assert !ispnXml().server.endpoints['memcached-connector'].isEmpty()
+        assert !ispnXml().server.endpoints[MEMCACHED_ENDPOINT].isEmpty()
     }
 
     @Test
     void testRestAuthEnabledByDefault() {
         createConfig()
         def ispn = ispnXml()
-        assert !ispn.server.endpoints['rest-connector'].authentication.isEmpty()
-        assert 'DIGEST' == ispn.server.endpoints['rest-connector'].authentication.@mechanisms.toString()
-        assert 'default' == ispn.server.endpoints['rest-connector'].authentication.@'security-realm'.toString()
+        assert !ispn.server.endpoints[REST_ENDPOINT].authentication.isEmpty()
+        assert 'DIGEST' == ispn.server.endpoints[REST_ENDPOINT].authentication.@mechanisms.toString()
+        assert 'default' == ispn.server.endpoints[REST_ENDPOINT].authentication.@'security-realm'.toString()
+    }
+
+    @Test
+    void testRestDisabled() {
+        createConfig '''
+            |endpoints:
+            |  rest:
+            |    enabled: false
+            '''
+        assert ispnXml().server.endpoints[REST_ENDPOINT].isEmpty()
     }
 
     @Test
     void testHotRodAuthEnabledByDefault() {
         createConfig()
         def ispn = ispnXml()
-        assert !ispn.server.endpoints['hotrod-connector'].authentication.sasl.isEmpty()
-        assert 'default' == ispn.server.endpoints['hotrod-connector'].authentication.@'security-realm'.toString()
-        assert 'infinispan' == ispn.server.endpoints['hotrod-connector'].authentication.sasl.@'server-name'.toString()
+        assert !ispn.server.endpoints[HOTROD_ENDPOINT].authentication.sasl.isEmpty()
+        assert 'default' == ispn.server.endpoints[HOTROD_ENDPOINT].authentication.@'security-realm'.toString()
+        assert 'infinispan' == ispn.server.endpoints[HOTROD_ENDPOINT].authentication.sasl.@'server-name'.toString()
+    }
+
+    @Test
+    void testHotRodDisabled() {
+        createConfig '''
+            |endpoints:
+            |  hotrod:
+            |    enabled: false
+            '''
+        assert ispnXml().server.endpoints[HOTROD_ENDPOINT].isEmpty()
     }
 
     @Test
