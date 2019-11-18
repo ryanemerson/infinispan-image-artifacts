@@ -1,5 +1,6 @@
 infinispan:
   clusterName: infinispan
+  marshaller: ""
 endpoints:
   hotrod:
     auth: true

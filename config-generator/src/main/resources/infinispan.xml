@@ -36,6 +36,25 @@
 
     <cache-container>
         <transport cluster="${infinispan.clusterName}" stack="${stack}"/>
+        <!--  Is there a neater way todo this?      -->
+<!--        https://jira.apache.org/jira/browse/GROOVY-839-->
+<!--        https://jira.apache.org/jira/browse/GROOVY-952-->
+        <gsp:scriptlet>
+            <![CDATA[
+            def marshaller = infinispan.marshaller ? "<serialization marshaller=${infinispan.marshaller}>" : "<serialization>"
+            println marshaller
+            ]]>
+        </gsp:scriptlet>
+            <gsp:scriptlet>if (infinispan.whiteListRegex) {</gsp:scriptlet>
+            <white-list>
+                <regex>${infinispan.whiteListRegex}</regex>
+            </white-list>
+            <gsp:scriptlet>}</gsp:scriptlet>
+        <gsp:scriptlet>
+            <![CDATA[
+            println '</serialization>'
+            ]]>
+        </gsp:scriptlet>
     </cache-container>
 
     <server xmlns="urn:infinispan:server:10.0">

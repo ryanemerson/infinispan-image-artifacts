@@ -8,6 +8,7 @@ import org.yaml.snakeyaml.Yaml
 
 class ConfigTest {
 
+    private static final String CACHE_CONTAINER = 'cache-container'
     private static final String HOTROD_ENDPOINT = 'hotrod-connector'
     private static final String MEMCACHED_ENDPOINT = 'memcached-connector'
     private static final String REST_ENDPOINT = 'rest-connector'
@@ -22,7 +23,7 @@ class ConfigTest {
 
     @AfterClass
     static void teardown() {
-        outputDir.deleteDir()
+//        outputDir.deleteDir()
     }
 
     @Test
@@ -110,7 +111,21 @@ class ConfigTest {
             |infinispan:
             |  clusterName: ${customName}
             """
-        assert 'customClusterName' == ispnXml()['cache-container'].transport.@cluster.toString()
+        assert 'customClusterName' == ispnXml()[CACHE_CONTAINER].transport.@cluster.toString()
+    }
+
+    @Test
+    void testCustomMarshallerAndWhiteList() {
+        String marshaller = 'org.infinispan.commons.marshall.JavaSerializationMarshaller'
+        String regex = 'org.infinispan.*'
+        createConfig """
+            |infinispan:
+            |  marshaller: ${marshaller}
+            |  whiteListRegex: ${regex}
+            """
+        def ispn = ispnXml()
+        assert marshaller == ispn[CACHE_CONTAINER].serialization.@marshaller.toString()
+        assert regex == ispn[CACHE_CONTAINER].serialization['white-list'].regex.text().trim()
     }
 
     private static createConfig(String yaml = "") {
