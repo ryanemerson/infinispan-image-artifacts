@@ -70,7 +70,7 @@
 
         <version.groovy>2.5.7</version.groovy>
         <version.snakeyaml>1.23</version.snakeyaml>
-        <version.substrate>19.2.1</version.substrate>
+        <version.graalvm>19.3.0</version.graalvm>
         <version.maven.buildhelper>1.8</version.maven.buildhelper>
         <version.maven.assembly.plugin>3.1.1</version.maven.assembly.plugin>
         <version.maven.compiler.plugin>3.8.0</version.maven.compiler.plugin>
@@ -102,7 +102,7 @@
                 <plugin>
                     <groupId>com.oracle.substratevm</groupId>
                     <artifactId>native-image-maven-plugin</artifactId>
-                    <version>${version.substrate}</version>
+                    <version>${version.graalvm}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
