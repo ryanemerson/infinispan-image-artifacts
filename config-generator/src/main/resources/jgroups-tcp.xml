@@ -4,7 +4,7 @@
         xmlns:gsp="http://groovy.codehaus.org/2005/gsp">
     <TCP bind_addr="${jgroups.bindAddress}"
          bind_port="7800"
-         enable_diagnostics="false"
+         enable_diagnostics="true"
          thread_naming_pattern="pl"
          send_buf_size="640k"
          sock_conn_timeout="300"
