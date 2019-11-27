@@ -4,6 +4,7 @@
         xmlns:gsp="http://groovy.codehaus.org/2005/gsp">
     <TCP bind_addr="${jgroups.bindAddress}"
          bind_port="7900"
+         enable_diagnostics="${jgroups.diagnostics}"
          external_addr="${xsite.address}"
          external_port="${xsite.port}"
          port_range="0"

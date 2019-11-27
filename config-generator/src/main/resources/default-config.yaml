@@ -12,6 +12,7 @@ endpoints:
     auth: true
     enabled: true
 jgroups:
+  diagnostics: false
   transport: tcp
   dnsPing:
     address: ""

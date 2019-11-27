@@ -167,6 +167,61 @@ class ConfigTest {
         assert 'Key-Content-Type' == ispn.server.endpoints[REST_ENDPOINT][CORS_RULES][CORS_RULE][1][EXPOSE_HEADERS].toString()
     }
 
+    @Test
+    void testJGroupsDiagnosticsDefaultUdp() {
+        createConfig """
+            |jgroups:
+            |  transport: udp
+            """
+        testDiagnostics 'jgroups-udp.xml', 'UDP', false
+    }
+
+    @Test
+    void testEnableJGroupsDiagnosticsUDP() {
+        createConfig """
+            |jgroups:
+            |  transport: udp
+            |  diagnostics: true
+            """
+        testDiagnostics 'jgroups-udp.xml', 'UDP', true
+    }
+
+    @Test
+    void testJGroupsDiagnosticsDefaultTCP() {
+        testJGroupsDiagnosticsTcp false
+    }
+
+    @Test
+    void testEnableJGroupsDiagnosticsTCP() {
+        testJGroupsDiagnosticsTcp true
+    }
+
+    private static void testJGroupsDiagnosticsTcp(boolean enabled) {
+        String diagnosticsYaml = """\n
+            |jgroups:
+            |  diagnostics: true
+            """
+        String xsiteYaml = """
+            |xsite:
+            |  address:
+            |    name: LON
+            |    port: 7200
+            |  backups:
+            |    - address:
+            |      name: NYC
+            |      port: 7200
+            """
+        String config = enabled ? diagnosticsYaml + xsiteYaml : xsiteYaml
+        createConfig config
+        testDiagnostics 'jgroups-tcp.xml', 'TCP', enabled
+        testDiagnostics 'jgroups-relay.xml', 'TCP', enabled
+    }
+
+    private static void testDiagnostics(String fileName, String protocol, boolean enabled) {
+        def xml = new XmlSlurper().parse(new File(outputDir, fileName))
+        assert enabled == xml[protocol].@'enable_diagnostics'.toBoolean()
+    }
+
     private static createConfig(String yaml = "") {
         Map userConfig = new Yaml().load(yaml.stripMargin())
         Config.process(userConfig, outputDir)
