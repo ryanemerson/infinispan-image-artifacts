@@ -15,6 +15,7 @@
     </gsp:scriptlet>
     <TCPPING initial_hosts="${xsite.address}[${xsite.port}],${remoteSites}"
              port_range="0"
+             return_entire_cache="true"
     />
 
     <MERGE3/>
