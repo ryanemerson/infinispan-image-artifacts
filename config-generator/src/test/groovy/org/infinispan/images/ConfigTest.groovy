@@ -168,6 +168,35 @@ class ConfigTest {
     }
 
     @Test
+    void testJGroupsEncryptionUdp() {
+        testJGroupsEncryption 'udp'
+        testJGroupsEncryption 'udp', true
+    }
+
+    @Test
+    void testJGroupsEncryptionTcp() {
+        testJGroupsEncryption 'tcp'
+        testJGroupsEncryption 'tcp', true
+    }
+
+    private static void testJGroupsEncryption(String protocol, boolean enabled=false) {
+        createConfig """
+            |jgroups:
+            |  encrypt: ${enabled}
+            |  transport: ${protocol}
+            """
+        def xml = new XmlSlurper().parse(new File(outputDir, "jgroups-${protocol}.xml"))
+        if (enabled) {
+            assert !xml.ASYM_ENCRYPT.@'use_external_key_exchange'.toBoolean()
+            assert 'AES/ECB/PKCS5Padding' == xml.ASYM_ENCRYPT.@'sym_algorithm'.toString()
+            assert '512' == xml.ASYM_ENCRYPT.@'asym_keylength'.toString()
+            assert 'RSA' == xml.ASYM_ENCRYPT.@'asym_algorithm'.toString()
+        } else {
+            assert xml.ASYM_ENCRYPT.isEmpty()
+        }
+    }
+
+    @Test
     void testJGroupsDiagnosticsDefaultUdp() {
         createConfig """
             |jgroups:

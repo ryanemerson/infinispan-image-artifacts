@@ -13,6 +13,7 @@ endpoints:
     enabled: true
 jgroups:
   diagnostics: false
+  encrypt: false
   transport: tcp
   dnsPing:
     address: ""

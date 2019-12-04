@@ -43,6 +43,15 @@
             timeout_check_interval="1000"
     />
     <VERIFY_SUSPECT timeout="1000"/>
+
+    <gsp:scriptlet>if (jgroups?.encrypt) {</gsp:scriptlet>
+    <ASYM_ENCRYPT use_external_key_exchange="false"
+                  sym_algorithm="AES/ECB/PKCS5Padding"
+                  asym_keylength="512"
+                  asym_algorithm="RSA"
+    />
+    <gsp:scriptlet>}</gsp:scriptlet>
+
     <pbcast.NAKACK2 xmit_interval="100"
                     xmit_table_num_rows="50"
                     xmit_table_msgs_per_row="1024"
