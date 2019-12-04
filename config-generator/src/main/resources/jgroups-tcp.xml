@@ -45,11 +45,23 @@
     <VERIFY_SUSPECT timeout="1000"/>
 
     <gsp:scriptlet>if (jgroups?.encrypt) {</gsp:scriptlet>
-    <ASYM_ENCRYPT use_external_key_exchange="false"
-                  sym_algorithm="AES/ECB/PKCS5Padding"
-                  asym_keylength="512"
-                  asym_algorithm="RSA"
+    <gsp:scriptlet>if (keystore?.path) {</gsp:scriptlet>
+    <SSL_KEY_EXCHANGE
+            keystore_name="${keystore.path}"
+            keystore_password="${keystore.password}"
+            keystore_type="${keystore.type}"
+            port="2157"
+            port_range="0"
     />
+    <gsp:scriptlet>}</gsp:scriptlet>
+    <ASYM_ENCRYPT use_external_key_exchange="${keystore?.path ? true : false}"
+                  sym_algorithm="AES"
+                  sym_keylength="128"
+                  asym_algorithm="RSA"
+                  asym_keylength="512"
+    />
+
+    <SERIALIZE />
     <gsp:scriptlet>}</gsp:scriptlet>
 
     <pbcast.NAKACK2 use_mcast_xmit="false"

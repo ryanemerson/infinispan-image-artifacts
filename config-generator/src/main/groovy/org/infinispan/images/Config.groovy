@@ -2,6 +2,10 @@ package org.infinispan.images
 
 import org.yaml.snakeyaml.Yaml
 
+import java.nio.charset.StandardCharsets
+import java.security.KeyStore
+import java.security.cert.CertificateFactory
+
 import static org.infinispan.images.Util.*
 
 static void create(userFile, File outputDir) {
@@ -57,15 +61,48 @@ static void configureKeystore(ks, File outputDir) {
     // any eventual content in ks.path)
     if (ks.crtPath != null) {
         String crtSrc = addSeparator((String) ks.crtPath)
-        String ksPkcs = "${ksRoot}keystore.pkcs12"
+        String ksPkcs = "${ksRoot}keystore.${ks.type.toLowerCase()}"
 
         // Add values to the map so they can be used in the templates
         ks.path = ks.path ?: "${ksRoot}keystore.p12"
         ks.password = ks.password ?: "infinispan"
+        char[] ksPass = ks.password.toCharArray()
 
         exec "openssl pkcs12 -export -inkey ${crtSrc}tls.key -in ${crtSrc}tls.crt -out ${ksPkcs} -name ${ks.alias} -password pass:${ks.password}"
 
-        exec "keytool -importkeystore -noprompt -srckeystore ${ksPkcs} -srcstoretype pkcs12 -srcstorepass ${ks.password} -srcalias ${ks.alias} " +
-                "-destalias ${ks.alias} -destkeystore ${ks.path} -deststoretype pkcs12 -storepass ${ks.password}"
+        // Load the pkcs12 keystore
+        KeyStore keyStore = KeyStore.getInstance((String) ks.type)
+        new File(ksPkcs).withDataInputStream { is -> keyStore.load is, ksPass }
+
+        // Add all certificates from provided CA file
+        CertificateFactory cf = CertificateFactory.getInstance 'X.509'
+        parseCAFile((String) ks.caFile).eachWithIndex { String cert, int i ->
+            String alias = i < 10 ? "service-crt-0{i}" : "service-crt-{i}"
+            Base64.getDecoder()
+                    .wrap(new ByteArrayInputStream(cert.getBytes(StandardCharsets.UTF_8)))
+                    .withCloseable { input ->
+                        keyStore.setCertificateEntry alias, cf.generateCertificate(input)
+                    }
+        }
+        // Store the keystore
+        new File(ks.path).withOutputStream { output -> keyStore.store output, ksPass }
     }
+}
+
+static List<String> parseCAFile(String path) throws IOException {
+    List<String> certs = new ArrayList<>()
+    if (!path) return certs
+
+    StringBuilder sb = new StringBuilder()
+    for (String line : new File(path).readLines()) {
+        if (line.isEmpty() || line.contains('BEGIN CERTIFICATE')) continue
+
+        if (line.contains('END CERTIFICATE')) {
+            certs.add sb.toString()
+            sb.setLength 0
+        } else {
+            sb.append line
+        }
+    }
+    certs
 }

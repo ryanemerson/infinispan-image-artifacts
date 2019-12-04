@@ -171,26 +171,44 @@ class ConfigTest {
     void testJGroupsEncryptionUdp() {
         testJGroupsEncryption 'udp'
         testJGroupsEncryption 'udp', true
+        testJGroupsEncryption 'udp', true, true
     }
 
     @Test
     void testJGroupsEncryptionTcp() {
         testJGroupsEncryption 'tcp'
         testJGroupsEncryption 'tcp', true
+        testJGroupsEncryption 'tcp', true, true
     }
 
-    private static void testJGroupsEncryption(String protocol, boolean enabled=false) {
-        createConfig """
+    private static void testJGroupsEncryption(String protocol, boolean enabled=false, boolean configureKeystore=false) {
+        String config = """
             |jgroups:
             |  encrypt: ${enabled}
             |  transport: ${protocol}
             """
+        if (configureKeystore) {
+            URI caUri = ConfigTest.class.getClassLoader().getResource('service-ca.crt').toURI()
+            config += """
+            |keystore:
+            |  caFile: ${caUri.path}
+            |  crtPath: ${caUri.resolve('.').path}
+            """
+        }
+
+        createConfig config
         def xml = new XmlSlurper().parse(new File(outputDir, "jgroups-${protocol}.xml"))
         if (enabled) {
-            assert !xml.ASYM_ENCRYPT.@'use_external_key_exchange'.toBoolean()
-            assert 'AES/ECB/PKCS5Padding' == xml.ASYM_ENCRYPT.@'sym_algorithm'.toString()
+            assert configureKeystore == xml.ASYM_ENCRYPT.@'use_external_key_exchange'.toBoolean()
+            assert 'AES' == xml.ASYM_ENCRYPT.@'sym_algorithm'.toString()
             assert '512' == xml.ASYM_ENCRYPT.@'asym_keylength'.toString()
             assert 'RSA' == xml.ASYM_ENCRYPT.@'asym_algorithm'.toString()
+
+            if (configureKeystore) {
+                assert new File(outputDir, 'keystores/keystore.p12').path == xml.SSL_KEY_EXCHANGE.@'keystore_name'.toString()
+                assert 'infinispan' == xml.SSL_KEY_EXCHANGE.@'keystore_password'.toString()
+                assert 'pkcs12' == xml.SSL_KEY_EXCHANGE.@'keystore_type'.toString()
+            }
         } else {
             assert xml.ASYM_ENCRYPT.isEmpty()
         }

@@ -21,6 +21,7 @@ jgroups:
 keystore:
   alias: server
   selfSignCert: false
+  type: pkcs12
 xsite:
   masterCandidate: true
 
