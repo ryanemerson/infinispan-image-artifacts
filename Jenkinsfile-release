@@ -7,7 +7,7 @@ pipeline {
 
     parameters {
         string(name: 'version', defaultValue: '', description: 'Release version')
-        string(name: 'nextVersion', defaultValue: '', description: 'Next release version (blank to stay on existing SNAPSHOT')
+        string(name: 'nextVersion', defaultValue: '', description: 'Next working version')
         booleanParam(name: 'dryRun', defaultValue: false, description: 'If true, we don\'t deploy to nexus')
         gitParameter(name: 'branch', defaultValue: 'origin/master', branchFilter: 'origin/(.*)', type: 'PT_BRANCH', description: 'Branch to release from')
     }
@@ -30,9 +30,6 @@ pipeline {
         }
 
         stage('Version') {
-            when {
-                expression { params.nextVersion != '' }
-            }
             steps {
                 sh "$MAVEN_HOME/bin/mvn -B -V versions:set -DnewVersion=${params.version} -DprocessAllModules=true"
             }
@@ -57,9 +54,6 @@ pipeline {
         }
 
         stage('Next version') {
-            when {
-                expression { params.nextVersion != '' }
-            }
             steps {
                 script {
                     sh "$MAVEN_HOME/bin/mvn -B -V versions:set -DnewVersion=${params.nextVersion} -DprocessAllModules=true"
