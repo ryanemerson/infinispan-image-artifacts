@@ -42,7 +42,7 @@
         <gsp:scriptlet>}</gsp:scriptlet>
     </jgroups>
 
-    <cache-container name="default">
+    <cache-container name="default" statistics="true">
         <transport cluster="${infinispan.clusterName}" stack="${stack}"/>
     </cache-container>
 
