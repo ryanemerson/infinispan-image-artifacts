@@ -27,7 +27,6 @@ class IdentitiesTest {
             |credentials:
             |  - username: user1
             |    password: pass
-            |    preDigestedPassword: true
             |    roles:
             |    - admin
             |    - rockstar
@@ -40,9 +39,8 @@ class IdentitiesTest {
 
         Properties userProps = loadPropertiesFile('users.properties')
         assert 2 == userProps.size()
-        // If as 'preDigestedPassword' is true for user1, the stored password should still be 'pass'
         assert 'pass' == userProps.get('user1')
-        assert 'pass' != userProps.get('user2')
+        assert 'pass' == userProps.get('user2')
 
         Properties groupProps = loadPropertiesFile('groups.properties')
         assert 2 == groupProps.size()
