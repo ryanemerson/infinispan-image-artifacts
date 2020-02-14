@@ -2,8 +2,6 @@ package org.infinispan.images
 
 import org.yaml.snakeyaml.Yaml
 
-import java.security.MessageDigest
-
 import static org.infinispan.images.Util.printErrorAndExit
 
 static void create(String userFile, File outputDir) {
@@ -22,13 +20,7 @@ static void processCredentials(credentials, File outputDir, realm = "default") {
     credentials.each { c ->
         if (!c.username || !c.password) printErrorAndExit "Credential identities require both a 'username' and 'password'"
 
-        if (c.preDigestedPassword) {
-            users.put c.username, c.password
-        } else {
-            MessageDigest md5 = MessageDigest.getInstance "MD5"
-            String hash = md5.digest("${c.username}:${realm}:${c.password}".getBytes("UTF-8")).encodeHex().toString()
-            users.put c.username, hash
-        }
+        users.put c.username, c.password
 
         if (c.roles) groups.put c.username, c.roles.join(",")
     }
