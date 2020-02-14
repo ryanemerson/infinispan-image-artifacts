@@ -53,7 +53,6 @@ class ConfigTest {
         def ispn = ispnXml()
         assert !ispn.server.endpoints[REST_ENDPOINT].authentication.isEmpty()
         assert 'DIGEST' == ispn.server.endpoints[REST_ENDPOINT].authentication.@mechanisms.toString()
-        assert 'default' == ispn.server.endpoints[REST_ENDPOINT].authentication.@'security-realm'.toString()
     }
 
     @Test
@@ -83,7 +82,6 @@ class ConfigTest {
         createConfig()
         def ispn = ispnXml()
         assert !ispn.server.endpoints[HOTROD_ENDPOINT].authentication.sasl.isEmpty()
-        assert 'default' == ispn.server.endpoints[HOTROD_ENDPOINT].authentication.@'security-realm'.toString()
         assert 'infinispan' == ispn.server.endpoints[HOTROD_ENDPOINT].authentication.sasl.@'server-name'.toString()
     }
 
