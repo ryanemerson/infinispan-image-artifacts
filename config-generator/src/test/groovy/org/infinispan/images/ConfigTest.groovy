@@ -168,6 +168,66 @@ class ConfigTest {
     }
 
     @Test
+    void testDefaultLogging() {
+        createConfig()
+        def logging = new XmlSlurper().parse(new File(outputDir, 'log4j2.xml'))
+        assert '%highlight{%d{HH:mm:ss,SSS} %-5p (%t) [%c] %m%throwable}{INFO=normal, DEBUG=normal, TRACE=normal}%n' == logging.Appenders.Console.PatternLayout.@'pattern'.toString()
+
+        assert '${sys:infinispan.server.log.path}/server.log' == logging.Appenders.RollingFile.@fileName.toString()
+        assert '${sys:infinispan.server.log.path}/server.log.%d{yyyy-MM-dd}-%i' == logging.Appenders.RollingFile.@filePattern.toString()
+        assert '%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p (%t) [%c] %m%throwable%n' == logging.Appenders.RollingFile.PatternLayout.@'pattern'.toString()
+
+        assert 'STDOUT' == logging.Loggers.Root.AppenderRef[0].@ref.toString()
+        assert 'TRACE' == logging.Loggers.Root.AppenderRef[0].@level.toString()
+
+        assert 'FILE' == logging.Loggers.Root.AppenderRef[1].@ref.toString()
+        assert 'TRACE' == logging.Loggers.Root.AppenderRef[1].@level.toString()
+
+        assertLogger logging, 0, 'com.arjuna', 'WARN'
+        assertLogger logging, 1, 'org.infinispan', 'INFO'
+        assertLogger logging, 2, 'org.jgroups', 'WARN'
+    }
+
+    @Test
+    void testCustomLogging() {
+        createConfig """
+            |logging:
+            |  console:
+            |    level: info
+            |    pattern: '%K{level}%d{HH\\:mm\\:ss,SSS} %-5p [%c] (%t) %s%e%n'
+            |  file:
+            |    level: info
+            |    path: server/custom/log
+            |    pattern: '%d{yyyy-MM-dd HH\\:mm\\:ss,SSS} %-5p [%c] (%t) %s%e%n'
+            |  categories:
+            |    org.infinispan: debug
+            |    org.infinispan.commands: trace
+            """
+        def logging = new XmlSlurper().parse(new File(outputDir, 'log4j2.xml'))
+        assert '%K{level}%d{HH\\:mm\\:ss,SSS} %-5p [%c] (%t) %s%e%n' == logging.Appenders.Console.PatternLayout.@'pattern'.toString()
+
+        assert 'server/custom/log' == logging.Appenders.RollingFile.@fileName.toString()
+        assert 'server/custom/log.%d{yyyy-MM-dd}-%i' == logging.Appenders.RollingFile.@filePattern.toString()
+        assert '%d{yyyy-MM-dd HH\\:mm\\:ss,SSS} %-5p [%c] (%t) %s%e%n' == logging.Appenders.RollingFile.PatternLayout.@'pattern'.toString()
+
+        assert 'STDOUT' == logging.Loggers.Root.AppenderRef[0].@ref.toString()
+        assert 'INFO' == logging.Loggers.Root.AppenderRef[0].@level.toString()
+
+        assert 'FILE' == logging.Loggers.Root.AppenderRef[1].@ref.toString()
+        assert 'INFO' == logging.Loggers.Root.AppenderRef[1].@level.toString()
+
+        assertLogger logging, 0, 'com.arjuna', 'WARN'
+        assertLogger logging, 1, 'org.infinispan', 'DEBUG'
+        assertLogger logging, 2, 'org.jgroups', 'WARN'
+        assertLogger logging, 3, 'org.infinispan.commands', 'TRACE'
+    }
+
+    void assertLogger (def xml, int index, String category, String level) {
+        assert category == xml.Loggers.Logger[index].@name.toString()
+        assert level == xml.Loggers.Logger[index].@level.toString()
+    }
+
+    @Test
     void testJGroupsEncryptionUdp() {
         testJGroupsEncryption 'udp'
         testJGroupsEncryption 'udp', true
