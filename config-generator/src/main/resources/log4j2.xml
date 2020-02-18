@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration xmlns:gsp="http://groovy.codehaus.org/2005/gsp"
+               name="InfinispanServerConfig" monitorInterval="60">
+    <Appenders>
+        <!-- Colored output on the console -->
+        <Console name="STDOUT">
+            <PatternLayout pattern="${logging.console.pattern}"/>
+        </Console>
+
+        <!-- Rolling file -->
+        <RollingFile name="FILE" createOnDemand="true"
+                     fileName="${logging.file.path}"
+                     filePattern="${logging.file.path}.%d{yyyy-MM-dd}-%i">
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="100 MB" />
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+            <PatternLayout pattern="${logging.file.pattern}"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="STDOUT" level="${logging.console.level.toUpperCase()}"/>
+            <AppenderRef ref="FILE" level="${logging.file.level.toUpperCase()}"/>
+        </Root>
+
+        <gsp:scriptlet>
+            logging.categories.each {
+        </gsp:scriptlet>
+        <Logger name="${it.key}" level="${it.value.toUpperCase()}"/>
+        <gsp:scriptlet>}</gsp:scriptlet>
+    </Loggers>
+</Configuration>

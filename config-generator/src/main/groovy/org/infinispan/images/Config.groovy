@@ -35,7 +35,7 @@ static void process(Map userConfig, File outputDir) {
     proccessXmlTemplate 'infinispan.xml', new File(outputDir, 'infinispan.xml'), configYaml
 
     // Generate Logging configuration
-    processPropertiesTemplate 'logging.properties', new File(outputDir, 'logging.properties'), configYaml
+    proccessXmlTemplate 'log4j2.xml', new File(outputDir, 'log4j2.xml'), configYaml
 }
 
 static void configureKeystore(ks, File outputDir) {
