@@ -21,6 +21,7 @@ class ConfigTest {
 
     @BeforeClass
     static void setup() {
+        // TODO replace with CommonsTestingUtil from commons-test
         def path = "${System.properties['java.io.tmpdir']}/${ConfigTest.getSimpleName()}"
         outputDir = new File(path)
         outputDir.mkdir()
