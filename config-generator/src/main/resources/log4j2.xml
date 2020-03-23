@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration xmlns:gsp="http://groovy.codehaus.org/2005/gsp"
-               name="InfinispanServerConfig" monitorInterval="60">
+               name="InfinispanServerConfig" monitorInterval="60" shutdownHook="disable">
     <Appenders>
         <!-- Colored output on the console -->
         <Console name="STDOUT">
