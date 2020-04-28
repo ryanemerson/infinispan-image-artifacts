@@ -1,0 +1,2 @@
+jgroups:
+  encrypt: true

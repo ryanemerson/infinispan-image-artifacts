@@ -59,23 +59,19 @@
     </modules>
 
     <properties>
+        <compiler-plugin.version>3.8.1</compiler-plugin.version>
+        <maven.compiler.parameters>true</maven.compiler.parameters>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <jboss.releases.repo.id>jboss-releases-repository</jboss.releases.repo.id>
         <jboss.releases.nexus.url>https://repository.jboss.org/nexus</jboss.releases.nexus.url>
         <jboss.releases.repo.url>${jboss.releases.nexus.url}/service/local/staging/deploy/maven2/
         </jboss.releases.repo.url>
 
-        <version.groovy>2.5.7</version.groovy>
-        <version.snakeyaml>1.23</version.snakeyaml>
-        <version.substrate>19.1.1</version.substrate>
-        <version.maven.buildhelper>1.8</version.maven.buildhelper>
-        <version.maven.assembly.plugin>3.1.1</version.maven.assembly.plugin>
-        <version.maven.compiler.plugin>3.8.0</version.maven.compiler.plugin>
-        <version.maven.groovy.eclipse.compiler>2.9.2-01</version.maven.groovy.eclipse.compiler>
-        <version.maven.groovy.eclipse.batch>2.5.6-01</version.maven.groovy.eclipse.batch>
+        <version.maven.checkstyle.plugin>3.0.0</version.maven.checkstyle.plugin>
         <version.maven.nexus-staging>1.6.8</version.maven.nexus-staging>
         <version.maven.source>3.0.1</version.maven.source>
         <version.maven.surefire>3.0.0-M3</version.maven.surefire>
@@ -121,6 +117,25 @@
                     </execution>
                 </executions>
                 <inherited>true</inherited>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${version.maven.checkstyle.plugin}</version>
+                <inherited>true</inherited>
+                <configuration>
+                    <configLocation>checkstyle.xml</configLocation>
+                    <consoleOutput>true</consoleOutput>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>checkstyle</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -1,142 +1,154 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-         xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.infinispan.images</groupId>
         <artifactId>infinispan-images-parent</artifactId>
         <version>2.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>config-generator</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
-
     <properties>
-        <mainClass>org.infinispan.images.Main</mainClass>
+        <version.assertj>3.14.0</version.assertj>
+        <version.bytebuddy>1.10.0</version.bytebuddy>
+        <version.picoli>4.2.0</version.picoli>
+        <version.quarkus>1.4.1.Final</version.quarkus>
+        <version.snakeyaml>1.26</version.snakeyaml>
+        <version.xmlunit>2.6.4</version.xmlunit>
     </properties>
-
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-universe-bom</artifactId>
+                <version>${version.quarkus}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy</artifactId>
-            <version>${version.groovy}</version>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-qute</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-cli-picocli</artifactId>
-            <version>${version.groovy}</version>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>${version.picoli}</version>
         </dependency>
-
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-templates</artifactId>
-            <version>${version.groovy}</version>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli-codegen</artifactId>
+            <version>${version.picoli}</version>
         </dependency>
-
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>${version.snakeyaml}</version>
         </dependency>
-
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-test</artifactId>
-            <version>${version.groovy}</version>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>${version.bytebuddy}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Explicitly define assertj version to fix XMlUnit issue https://github.com/xmlunit/xmlunit/issues/181-->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${version.assertj}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-assertj</artifactId>
+            <version>${version.xmlunit}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-core</artifactId>
+            <version>${version.xmlunit}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.xmlunit</groupId>
+            <artifactId>xmlunit-matchers</artifactId>
+            <version>${version.xmlunit}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${version.maven.compiler.plugin}</version>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <version>${version.quarkus}</version>
                 <configuration>
-                    <compilerId>groovy-eclipse-compiler</compilerId>
+                    <uberJar>true</uberJar>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy-eclipse-compiler</artifactId>
-                        <version>${version.maven.groovy.eclipse.compiler}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy-eclipse-batch</artifactId>
-                        <version>${version.maven.groovy.eclipse.batch}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>${version.maven.buildhelper}</version>
                 <executions>
                     <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>add-source</goal>
+                            <goal>build</goal>
                         </goals>
-                        <configuration>
-                            <sources>
-                                <source>src/main/groovy</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>add-test-source</id>
-                        <phase>generate-test-sources</phase>
-                        <goals>
-                            <goal>add-test-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>src/test/groovy</source>
-                            </sources>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>${version.maven.assembly.plugin}</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <archive>
-                                <manifest>
-                                    <mainClass>${mainClass}</mainClass>
-                                </manifest>
-                            </archive>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                        </configuration>
-                    </execution>
-                </executions>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${compiler-plugin.version}</version>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${version.maven.surefire}</version>
                 <configuration>
-                    <failIfNoTests>true</failIfNoTests>
-                    <includes>
-                        <include>**/*Test*.*</include>
-                    </includes>
+                    <systemProperties>
+                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                    </systemProperties>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>native</id>
+            <activation>
+                <property>
+                    <name>native</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${version.maven.surefire}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <native.image.path>${project.build.directory}/${project.build.finalName}-runner
+                                </native.image.path>
+                            </systemPropertyVariables>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <quarkus.package.type>native</quarkus.package.type>
+            </properties>
+        </profile>
+    </profiles>
 </project>

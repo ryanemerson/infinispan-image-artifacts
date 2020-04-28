@@ -1,0 +1,106 @@
+<infinispan
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:infinispan:config:11.0 https://infinispan.org/schemas/infinispan-config-11.0.xsd
+                            urn:infinispan:server:11.0 https://infinispan.org/schemas/infinispan-server-11.0.xsd"
+        xmlns="urn:infinispan:config:11.0"
+        xmlns:server="urn:infinispan:server:11.0"
+        xmlns:jgroups="urn:org.jgroups">
+
+    <jgroups>
+        <stack-file name="image-{jgroups.transport}" path="jgroups-{jgroups.transport}.xml"/>
+
+        {#if xsite.backups}
+        <stack-file name="relay-global" path="jgroups-relay.xml"/>
+
+        <stack name="xsite" extends="image-{jgroups.transport}">
+            <jgroups:relay.RELAY2 site="{xsite.name}" max_site_masters="1000"
+                                  can_become_site_master="{xsite.masterCandidate}"/>
+            <remote-sites default-stack="relay-global">
+                <remote-site name="{xsite.name}"/>
+                {#each xsite.backups}
+                <remote-site name="{it.name}"/>
+                {/each}
+            </remote-sites>
+        </stack>
+        {/if}
+    </jgroups>
+
+    <cache-container name="default" statistics="true">
+        <transport cluster="{infinispan.clusterName}"
+        {#if xsite.backups}stack="xsite"{#else}stack="image-{jgroups.transport}"{/if}/>
+    </cache-container>
+
+    <server xmlns="urn:infinispan:server:11.0">
+        <interfaces>
+            <interface name="public">
+                <inet-address value="{jgroups.bindAddress}"/>
+            </interface>
+        </interfaces>
+
+        <socket-bindings default-interface="public" port-offset="0">
+            <socket-binding name="default" port="11222"/>
+            {#if endpoints.memcached.enabled}
+            <socket-binding name="memcached" port="11221"/>
+            {/if}
+        </socket-bindings>
+
+        <security>
+            <security-realms>
+                <security-realm name="default">
+                    {#if keystore and keystore.path}
+                    <server-identities>
+                        <ssl>
+                            <keystore path="{keystore.path}" alias="{keystore.alias}"
+                                      keystore-password="{keystore.password}"
+                                      generate-self-signed-certificate-host="{keystore.selfSignCert ? 'localhost' : ''}"/>
+                        </ssl>
+                    </server-identities>
+                    {/if}
+                    <properties-realm groups-attribute="Roles">
+                        <user-properties path="users.properties" relative-to="infinispan.server.config.path"
+                                         plain-text="true"/>
+                        <group-properties path="groups.properties" relative-to="infinispan.server.config.path"/>
+                    </properties-realm>
+                </security-realm>
+            </security-realms>
+        </security>
+
+        <endpoints socket-binding="default" security-realm="default">
+            {#if endpoints.hotrod.enabled}
+            <hotrod-connector name="hotrod">
+                {#if endpoints.hotrod.auth}
+                <authentication>
+                    <sasl mechanisms="SCRAM-SHA-512 SCRAM-SHA-384 SCRAM-SHA-256 SCRAM-SHA-1 DIGEST-SHA-512 DIGEST-SHA-384 DIGEST-SHA-256 DIGEST-SHA DIGEST-MD5 PLAIN"
+                          qop="{endpoints.hotrod.qop}" server-name="{endpoints.hotrod.serverName}"/>
+                </authentication>
+                {/if}
+            </hotrod-connector>
+            {/if}
+
+            {#if endpoints.rest.enabled}
+            <rest-connector name="rest">
+                {#if endpoints.rest.auth}
+                <authentication mechanisms="DIGEST"/>
+                {/if}
+                {#if endpoints.rest.cors}
+                <cors-rules>
+                    {#for rule in endpoints.rest.cors}
+                    <cors-rule name="{rule.name}" allow-credentials="{rule.allowCredentials or 'false'}"
+                               max-age-seconds="{rule.maxAgeSeconds or 0}">
+                        {rule.allowedOrigins.listElement('allowed-origins') or ''}
+                        {rule.allowedMethods.listElement('allowed-methods') or ''}
+                        {rule.allowedHeaders.listElement('allowed-headers') or ''}
+                        {rule.exposeHeaders.listElement('expose-headers') or ''}
+                    </cors-rule>
+                    {/for}
+                </cors-rules>
+                {/if}
+            </rest-connector>
+            {/if}
+
+            {#if endpoints.memcached.enabled}
+            <memcached-connector socket-binding="memcached"/>
+            {/if}
+        </endpoints>
+    </server>
+</infinispan>

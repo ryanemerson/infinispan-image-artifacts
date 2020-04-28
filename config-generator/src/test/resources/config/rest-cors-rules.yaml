@@ -1,0 +1,26 @@
+endpoints:
+  rest:
+    cors:
+      - name: restrict-host1
+        allowedOrigins:
+          - http://host1
+          - https://host1
+        allowedMethods:
+          - GET
+
+      - name: allow-all
+        allowCredentials: true
+        allowedOrigins:
+          - '*'
+        allowedMethods:
+          - GET
+          - OPTIONS
+          - POST
+          - PUT
+          - DELETE
+        allowedHeaders:
+          - X-Custom-Header
+          - Upgrade-Insecure-Requests
+        exposeHeaders:
+          - Key-Content-Type
+        maxAgeSeconds: 1
