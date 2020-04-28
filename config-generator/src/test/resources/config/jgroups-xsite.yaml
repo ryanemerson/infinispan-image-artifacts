@@ -1,0 +1,9 @@
+xsite:
+  address: lon-addr
+  masterCandidate: false
+  name: LON
+  port: 7200
+  backups:
+    - address: nyc-addr
+      name: NYC
+      port: 7200

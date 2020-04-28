@@ -1,0 +1,3 @@
+endpoints:
+  rest:
+    auth: false

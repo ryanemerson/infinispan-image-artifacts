@@ -1,0 +1,11 @@
+logging:
+  console:
+    level: info
+    pattern: '%K{level}%d{HH\:mm\:ss,SSS} %-5p [%c] (%t) %s%e%n'
+  file:
+    level: info
+    path: server/custom/log
+    pattern: '%d{yyyy-MM-dd HH\:mm\:ss,SSS} %-5p [%c] (%t) %s%e%n'
+  categories:
+    org.infinispan: debug
+    org.infinispan.commands: trace
