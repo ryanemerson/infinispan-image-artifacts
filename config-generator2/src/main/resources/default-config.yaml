@@ -1,0 +1,39 @@
+infinispan:
+  clusterName: infinispan
+endpoints:
+  hotrod:
+    auth: true
+    enabled: true
+    qop: auth
+    serverName: infinispan
+  memcached:
+    enabled: false
+  rest:
+    auth: true
+    enabled: true
+jgroups:
+  diagnostics: false
+  encrypt: false
+  transport: tcp
+  dnsPing:
+    address: ""
+    recordType: A
+keystore:
+  alias: server
+  selfSignCert: false
+  type: pkcs12
+xsite:
+  masterCandidate: true
+
+logging:
+  console:
+    level: trace
+    pattern: '%highlight{%d{HH:mm:ss,SSS} %-5p (%t) [%c] %m%throwable}{INFO=normal, DEBUG=normal, TRACE=normal}%n'
+  file:
+    level: trace
+    path: '${sys:infinispan.server.log.path}/server.log'
+    pattern: '%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p (%t) [%c] %m%throwable%n'
+  categories:
+    com.arjuna: warn
+    org.infinispan: info
+    org.jgroups: warn
