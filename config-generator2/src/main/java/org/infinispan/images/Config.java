@@ -1,6 +1,7 @@
 package org.infinispan.images;
 
 import static org.infinispan.images.Util.get;
+import static org.infinispan.images.Util.loadYaml;
 import static org.infinispan.images.Util.loadYamlFromResources;
 import static org.infinispan.images.Util.merge;
 
@@ -41,7 +42,8 @@ public class Config {
    @Inject
    Template log4j2;
 
-   void process(Map<String, Object> userConfig, File outputDir) throws IOException {
+   void process(File serverConfig, File outputDir) throws IOException {
+      Map<String, Object> userConfig = loadYaml(serverConfig);
       Map<String, Object> config = loadYamlFromResources("default-config.yaml");
 
       ((Map<String, Object>) config.get("jgroups")).put("bindAddress", InetAddress.getLocalHost().getHostAddress());
@@ -80,7 +82,7 @@ public class Config {
 
    void createFileAndRenderTemplate(File outputDir, String fileName, Object data, Template template) throws IOException {
       Path filePath = new File(outputDir, fileName).toPath();
-      Files.writeString(filePath, log4j2.data(data).render(), StandardOpenOption.CREATE);
+      Files.writeString(filePath, template.data(data).render(), StandardOpenOption.CREATE);
    }
 
    @TemplateExtension

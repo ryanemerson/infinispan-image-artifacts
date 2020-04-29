@@ -1,41 +1,57 @@
 package org.infinispan.images;
 
+import static picocli.CommandLine.Command;
+import static picocli.CommandLine.Option;
+import static picocli.CommandLine.Parameters;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Map;
+import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 
-import org.yaml.snakeyaml.Yaml;
-
 import io.quarkus.runtime.QuarkusApplication;
-
+import picocli.CommandLine;
 
 public class Main implements QuarkusApplication {
 
-    @Inject
-    Config config;
+   @Inject
+   Config config;
 
-    @Override
-    public int run(String... args) throws Exception {
-        // TODO can we get picocli cli builder to work with Quarkus?
-        // 3. Use yaml to pass to Template
-        // 4. Make sure works with native
-        // 5. Convert log4j2 template
-        // 6. Convert infinispan.xml
-        // 7. Convert jgroups
+   @Override
+   public int run(String... args) {
+      // 6. Convert infinispan.xml
+      // 7. Convert jgroups
+      // 8. Convert identities
+      return new CommandLine(new MainCommand())
+            .execute(args);
+   }
 
-        System.out.println(args[0]);
-        System.out.println(args[1]);
-        System.out.println(args[2]);
-        String configFile = args[0].split("=")[1];
+   @Command(name = "config-generator")
+   class MainCommand implements Callable<Integer> {
 
-        try (InputStream is = new FileInputStream(new File(configFile))) {
-            Map<String, Object> m = new Yaml().load(is);
-            m.forEach((k, v) -> System.out.println(String.format("k=%s, v=%s", k, v)));
-            config.process(m, new File("/tmp"));
-        }
-        return 10;
-    }
+      @Option(
+            names = {"-c", "--config"},
+            description = {"Yaml file used to generate Infinispan configuration"}
+      )
+      File server;
+
+      @Option(
+            names = {"-i", "--identities"},
+            description = {"Yaml file used to initialize identities"}
+      )
+      File identities;
+
+      @Parameters(
+            index = "0",
+            description = {"The directory where the generated files will be saved"},
+            paramLabel = "output-dir"
+      )
+      File outputDir;
+
+      @Override
+      public Integer call() throws Exception {
+         config.process(server, outputDir);
+         return 0;
+      }
+   }
 }

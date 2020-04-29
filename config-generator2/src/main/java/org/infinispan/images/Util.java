@@ -16,8 +16,8 @@ public class Util {
       }
    }
 
-   static Map<String, Object> loadYaml(String path) throws IOException {
-      try (InputStream is = new FileInputStream(new File(path))) {
+   static Map<String, Object> loadYaml(File file) throws IOException {
+      try (InputStream is = new FileInputStream(file)) {
          return new Yaml().load(is);
       }
    }
