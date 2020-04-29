@@ -17,9 +17,11 @@ public class Main implements QuarkusApplication {
    @Inject
    Config config;
 
+   @Inject
+   Identities identities;
+
    @Override
    public int run(String... args) {
-      // 8. Convert identities
       return new CommandLine(new MainCommand())
             .execute(args);
    }
@@ -49,6 +51,8 @@ public class Main implements QuarkusApplication {
       @Override
       public Integer call() throws Exception {
          config.process(server, outputDir);
+         // TODO change name
+         Main.this.identities.process(identities, outputDir);
          return 0;
       }
    }
