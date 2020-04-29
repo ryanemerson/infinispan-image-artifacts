@@ -19,8 +19,6 @@ public class Main implements QuarkusApplication {
 
    @Override
    public int run(String... args) {
-      // 6. Convert infinispan.xml
-      // 7. Convert jgroups
       // 8. Convert identities
       return new CommandLine(new MainCommand())
             .execute(args);

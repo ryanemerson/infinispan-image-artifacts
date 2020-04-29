@@ -61,8 +61,7 @@ public class Config {
       createFileAndRenderTemplate(outputDir, "log4j2.xml", config, log4j2);
 
       // Generate Infinispan configuration
-//         TODO
-//         createFileAndRenderTemplate(outputDir, "infinispan.xml", config, infinispan);
+      createFileAndRenderTemplate(outputDir, "infinispan.xml", config, infinispan);
    }
 
    void configureJGroups(Map<String, Object> config, File outputDir) throws IOException {
@@ -88,5 +87,10 @@ public class Config {
    @TemplateExtension
    static String upperCase(String value) {
       return value == null ? null : value.toUpperCase();
+   }
+
+   @TemplateExtension
+   static String stack(String transport) {
+      return "image" + transport;
    }
 }

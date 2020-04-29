@@ -1,0 +1,18 @@
+{#if jgroups?.encrypt}
+   {#if keystore?.path}
+<SSL_KEY_EXCHANGE
+        keystore_name="{keystore.path}"
+        keystore_password="{keystore.password}"
+        keystore_type="{keystore.type}"
+        port="2157"
+        port_range="0"
+/>
+   {/if}
+<ASYM_ENCRYPT use_external_key_exchange="{keystore?.path ? true : false}"
+              sym_algorithm="AES"
+              sym_keylength="128"
+              asym_algorithm="RSA"
+              asym_keylength="512"
+/>
+<SERIALIZE />
+{/if}
