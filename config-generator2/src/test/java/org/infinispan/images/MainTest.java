@@ -1,13 +1,17 @@
 package org.infinispan.images;
 
-import org.junit.jupiter.api.Test;
+import javax.inject.Inject;
 
 import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
-public class MainTest {
+public class MainTest extends AbstractConfigTest {
 
-    @Test
-    public void testHelloEndpoint() {
+    @Inject
+    Main main;
+
+    @Override
+    void execute(String... args) {
+        main.run(args);
     }
 }

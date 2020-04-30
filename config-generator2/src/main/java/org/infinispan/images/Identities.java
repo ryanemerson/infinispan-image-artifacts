@@ -17,6 +17,9 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 class Identities {
    void process(File identitiesConfig, File outputDir) throws IOException {
+      if (identitiesConfig == null)
+         return;
+
       Map<String, Object> userConfig = loadYaml(identitiesConfig);
       processCredentials(get(userConfig, "credentials"), outputDir);
    }

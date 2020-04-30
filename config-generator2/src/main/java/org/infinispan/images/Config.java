@@ -43,7 +43,7 @@ public class Config {
    Template log4j2;
 
    void process(File serverConfig, File outputDir) throws IOException {
-      Map<String, Object> userConfig = loadYaml(serverConfig);
+      Map<String, Object> userConfig = serverConfig == null ? null : loadYaml(serverConfig);
       Map<String, Object> config = loadYamlFromResources("default-config.yaml");
 
       ((Map<String, Object>) config.get("jgroups")).put("bindAddress", InetAddress.getLocalHost().getHostAddress());

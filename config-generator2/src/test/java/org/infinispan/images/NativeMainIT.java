@@ -1,9 +1,13 @@
 package org.infinispan.images;
 
-import io.quarkus.test.junit.NativeImageTest;
+public class NativeMainIT extends AbstractConfigTest {
 
-@NativeImageTest
-public class NativeMainIT extends MainTest {
-
-    // Execute the same tests but in native mode.
+   @Override
+   void execute(String... args) throws Exception  {
+      String[] cmd = new String[args.length + 1];
+      cmd[0] = System.getProperty("native.image.path");
+      System.arraycopy(args, 0, cmd, 1, args.length);
+      Process process = new ProcessBuilder().command(cmd).inheritIO().start();
+      process.waitFor();
+   }
 }
