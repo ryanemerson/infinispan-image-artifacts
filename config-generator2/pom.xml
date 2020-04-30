@@ -9,6 +9,7 @@
   </parent>
   <artifactId>config-generator2</artifactId>
   <properties>
+    <groovy.version>2.5.7</groovy.version>
     <picoli.version>4.2.0</picoli.version>
     <quarkus-plugin.version>1.4.1.Final</quarkus-plugin.version>
     <quarkus.platform.artifact-id>quarkus-universe-bom</quarkus.platform.artifact-id>
@@ -16,6 +17,8 @@
     <quarkus.platform.version>1.4.1.Final</quarkus.platform.version>
     <snakeyaml.version>1.26</snakeyaml.version>
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
+
+    <version.maven.groovy.eclipse.compiler>2.9.2-01</version.maven.groovy.eclipse.compiler>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -53,6 +56,24 @@
       <artifactId>quarkus-junit5</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy</artifactId>
+      <version>${version.groovy}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-templates</artifactId>
+      <version>${version.groovy}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-test</artifactId>
+      <version>${groovy.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -71,6 +92,40 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${compiler-plugin.version}</version>
+        <configuration>
+          <compilerId>groovy-eclipse-compiler</compilerId>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-eclipse-compiler</artifactId>
+            <version>${version.maven.groovy.eclipse.compiler}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-eclipse-batch</artifactId>
+            <version>${version.maven.groovy.eclipse.batch}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>${version.maven.buildhelper}</version>
+        <executions>
+          <execution>
+            <id>add-test-source</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/test/groovy</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
