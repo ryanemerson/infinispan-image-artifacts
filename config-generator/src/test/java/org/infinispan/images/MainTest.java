@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
-public class MainTest extends AbstractConfigTest {
+public class MainTest extends AbstractMainTest {
 
    @Inject
    Main main;

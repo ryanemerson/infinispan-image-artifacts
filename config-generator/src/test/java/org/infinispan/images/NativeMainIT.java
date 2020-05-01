@@ -1,6 +1,6 @@
 package org.infinispan.images;
 
-public class NativeMainIT extends AbstractConfigTest {
+public class NativeMainIT extends AbstractMainTest {
 
    @Override
    void execute(String... args) throws Exception {

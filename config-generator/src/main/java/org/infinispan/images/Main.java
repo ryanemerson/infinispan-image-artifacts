@@ -15,10 +15,10 @@ import picocli.CommandLine;
 public class Main implements QuarkusApplication {
 
    @Inject
-   Config config;
+   ConfigGenerator configGenerator;
 
    @Inject
-   Identities identities;
+   IdentitiesGenerator identitiesGenerator;
 
    @Override
    public int run(String... args) {
@@ -50,9 +50,8 @@ public class Main implements QuarkusApplication {
 
       @Override
       public Integer call() throws Exception {
-         config.process(server, outputDir);
-         // TODO change name
-         Main.this.identities.process(identities, outputDir);
+         configGenerator.process(server, outputDir);
+         identitiesGenerator.process(identities, outputDir);
          return 0;
       }
    }

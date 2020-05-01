@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.xmlunit.assertj.MultipleNodeAssert;
 import org.xmlunit.assertj.XmlAssert;
 
-abstract class AbstractConfigTest {
+abstract class AbstractMainTest {
 
    static File outputDir;
 
@@ -297,19 +297,19 @@ abstract class AbstractConfigTest {
       assertEquals("non-admin", groupProps.get("user2"));
    }
 
-   private AbstractConfigTest generateDefault() throws Exception {
+   private AbstractMainTest generateDefault() throws Exception {
       execute(outputDir.getAbsolutePath());
       return this;
    }
 
-   private AbstractConfigTest generate(String configName) throws Exception {
+   private AbstractMainTest generate(String configName) throws Exception {
       String path = new File("src/test/resources/config", configName + ".yaml").getAbsolutePath();
       execute(String.format("--config=%s", path), outputDir.getAbsolutePath());
       return this;
    }
 
    private XmlAssert infinispan() throws Exception {
-      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), Config.INFINISPAN_FILE));
+      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.INFINISPAN_FILE));
 
       Map<String, String> prefix2Uri = new HashMap<>();
       prefix2Uri.put("i", "urn:infinispan:config:11.0");
@@ -319,22 +319,22 @@ abstract class AbstractConfigTest {
    }
 
    private XmlAssert logging() throws Exception {
-      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), Config.LOGGING_FILE));
+      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.LOGGING_FILE));
       return assertThat(config);
    }
 
    private XmlAssert jgroupsUdp() throws Exception {
-      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), Config.JGROUPS_UDP_FILE));
+      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.JGROUPS_UDP_FILE));
       return jgroups(config);
    }
 
    private XmlAssert jgroupsTcp() throws Exception {
-      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), Config.JGROUPS_TCP_FILE));
+      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.JGROUPS_TCP_FILE));
       return jgroups(config);
    }
 
    private XmlAssert jgroupsRelay() throws Exception {
-      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), Config.JGROUPS_RELAY_FILE));
+      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.JGROUPS_RELAY_FILE));
       return jgroups(config);
    }
 

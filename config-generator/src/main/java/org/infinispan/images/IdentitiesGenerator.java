@@ -15,7 +15,7 @@ import java.util.Properties;
 import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-class Identities {
+class IdentitiesGenerator {
    void process(File identitiesConfig, File outputDir) throws IOException {
       if (identitiesConfig == null)
          return;

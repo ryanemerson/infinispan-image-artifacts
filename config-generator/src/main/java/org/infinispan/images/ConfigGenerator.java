@@ -36,9 +36,8 @@ import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateExtension;
 import io.quarkus.qute.api.ResourcePath;
 
-// TODO Rename to ConfigGenerator & Identities  -> IdentitiesGenerator
 @ApplicationScoped
-public class Config {
+public class ConfigGenerator {
 
    static final String INFINISPAN_FILE = "infinispan.xml";
    static final String LOGGING_FILE = "log4j2.xml";
