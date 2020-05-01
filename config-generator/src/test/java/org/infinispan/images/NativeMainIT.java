@@ -7,6 +7,7 @@ public class NativeMainIT extends AbstractMainTest {
       String[] cmd = new String[args.length + 1];
       cmd[0] = System.getProperty("native.image.path");
       System.arraycopy(args, 0, cmd, 1, args.length);
-      Util.exec(cmd);
+      Process process = new ProcessBuilder().command(cmd).inheritIO().start();
+      process.waitFor();
    }
 }
