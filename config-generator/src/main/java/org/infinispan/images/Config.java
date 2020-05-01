@@ -26,6 +26,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -92,8 +93,20 @@ public class Config {
       String fileName = udp ? JGROUPS_UDP_FILE : JGROUPS_TCP_FILE;
       createFileAndRenderTemplate(outputDir, fileName, config, template);
 
-      if (get(config, "xsite.backups") != null)
-         createFileAndRenderTemplate(outputDir, fileName, config, jgroupsRelay);
+      configureJGroupsRelay(config, outputDir);
+   }
+
+   void configureJGroupsRelay(Map<String, Object> config, File outputDir) throws Exception {
+      List<Map<String, String>> backups = get(config, "xsite.backups");
+      if (backups == null)
+         return;
+
+      String remoteSites = backups.stream()
+            .map(b -> String.format("%s[%s]", b.get("address"), b.get("port")))
+            .collect(Collectors.joining(","));
+
+      config.put("remoteSites", remoteSites);
+      createFileAndRenderTemplate(outputDir, JGROUPS_RELAY_FILE, config, jgroupsRelay);
    }
 
    void configureKeystore(Map<String, Object> config, File outputDir) throws Exception {

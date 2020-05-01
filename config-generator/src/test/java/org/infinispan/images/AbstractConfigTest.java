@@ -245,6 +245,43 @@ abstract class AbstractConfigTest {
    }
 
    @Test
+   void testJGroupsXSite() throws Exception {
+      generate("jgroups-xsite");
+
+      XmlAssert infinispan = infinispan();
+      String jgroups = "//i:infinispan/i:jgroups";
+      infinispan.hasXPath(jgroups + "/i:stack-file[1]")
+            .haveAttribute("name", "image-tcp")
+            .haveAttribute("path", "jgroups-tcp.xml");
+
+      infinispan.hasXPath(jgroups + "/i:stack-file[2]")
+            .haveAttribute("name", "relay-global")
+            .haveAttribute("path", "jgroups-relay.xml");
+
+      infinispan.hasXPath("//i:infinispan/i:cache-container/i:transport")
+            .haveAttribute("stack", "xsite");
+
+      String stack = jgroups + "/i:stack";
+      infinispan.hasXPath(stack)
+            .haveAttribute("name", "xsite")
+            .haveAttribute("extends", "image-tcp");
+
+      infinispan.hasXPath(stack + "/i:remote-sites/i:remote-site[1]")
+            .haveAttribute("name", "LON");
+
+      infinispan.hasXPath(stack + "/i:remote-sites/i:remote-site[2]")
+            .haveAttribute("name", "NYC");
+
+      XmlAssert relay = jgroupsRelay();
+      relay.hasXPath("//j:config/j:TCP")
+            .haveAttribute("external_addr", "lon-addr")
+            .haveAttribute("external_port", "7200");
+
+      relay.hasXPath("//j:config/j:TCPPING")
+            .haveAttribute("initial_hosts", "lon-addr[7200],nyc-addr[7200]");
+   }
+
+   @Test
    void testCredentialIdentities() throws Exception {
       String path = new File("src/test/resources/identities", "identities.yaml").getAbsolutePath();
       execute(String.format("--identities=%s", path), outputDir.getAbsolutePath());
@@ -277,6 +314,7 @@ abstract class AbstractConfigTest {
       Map<String, String> prefix2Uri = new HashMap<>();
       prefix2Uri.put("i", "urn:infinispan:config:11.0");
       prefix2Uri.put("s", "urn:infinispan:server:11.0");
+      prefix2Uri.put("j", "urn:org:jgroups");
       return assertThat(config).withNamespaceContext(prefix2Uri);
    }
 
@@ -292,6 +330,11 @@ abstract class AbstractConfigTest {
 
    private XmlAssert jgroupsTcp() throws Exception {
       String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), Config.JGROUPS_TCP_FILE));
+      return jgroups(config);
+   }
+
+   private XmlAssert jgroupsRelay() throws Exception {
+      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), Config.JGROUPS_RELAY_FILE));
       return jgroups(config);
    }
 
