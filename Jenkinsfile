@@ -2,7 +2,7 @@
 
 pipeline {
     agent {
-        label 'slave-group-normal'
+        label 'slave-group-graalvm'
     }
 
     stages {
@@ -11,7 +11,7 @@ pipeline {
                 script {
                     env.MAVEN_HOME = tool('Maven')
                     env.MAVEN_OPTS = "-Xmx1g -XX:+HeapDumpOnOutOfMemoryError"
-                    env.JAVA_HOME = tool('JDK 11')
+                    env.JAVA_HOME = tool('GraalVM 20')
                 }
             }
         }
@@ -25,7 +25,7 @@ pipeline {
         stage('Build') {
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings-with-deploy-snapshot', variable: 'MAVEN_SETTINGS')]) {
-                    sh "$MAVEN_HOME/bin/mvn clean install -B -V -e -s $MAVEN_SETTINGS -DskipTests"
+                    sh "$MAVEN_HOME/bin/mvn clean package -Pnative -B -V -e -s $MAVEN_SETTINGS -DskipTests"
                 }
             }
         }
@@ -33,7 +33,7 @@ pipeline {
         stage('Tests') {
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings-with-deploy-snapshot', variable: 'MAVEN_SETTINGS')]) {
-                    sh "$MAVEN_HOME/bin/mvn verify -B -V -e -s $MAVEN_SETTINGS -Dmaven.test.failure.ignore=true -Dansi.strip=true"
+                    sh "$MAVEN_HOME/bin/mvn verify -Pnative -B -V -e -s $MAVEN_SETTINGS -Dmaven.test.failure.ignore=true -Dansi.strip=true"
                 }
                 // TODO Add StabilityTestDataPublisher after https://issues.jenkins-ci.org/browse/JENKINS-42610 is fixed
                 // Capture target/surefire-reports/*.xml, target/failsafe-reports/*.xml,
