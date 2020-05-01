@@ -98,7 +98,7 @@ public class Config {
 
    void configureKeystore(Map<String, Object> config, File outputDir) throws Exception {
       Map<String, String> ks = (Map<String, String>) config.computeIfAbsent("keystore", k -> new HashMap<>());
-      boolean noPathProvided = List.of("path", "crtPath") .stream().noneMatch(ks::containsKey);
+      boolean noPathProvided = List.of("path", "crtPath").stream().noneMatch(ks::containsKey);
       if (noPathProvided) {
          boolean selfSign = get(config, "keystore.selfSignCert");
          if (selfSign) {

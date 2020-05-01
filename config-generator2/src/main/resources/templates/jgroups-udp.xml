@@ -24,7 +24,7 @@
     <dns.DNS_PING dns_address="{jgroups.dnsPing.address}" dns_query="{jgroups.dnsPing.query}"
                   dns_record_type="{jgroups.dnsPing.recordType}"/>
     {#else}
-    <PING />
+    <PING/>
     {/if}
 
     <MERGE3 min_interval="10000"

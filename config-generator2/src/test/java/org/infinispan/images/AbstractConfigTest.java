@@ -40,7 +40,7 @@ abstract class AbstractConfigTest {
 
    @AfterEach
    void cleanup() {
-      for(File file: outputDir.listFiles())
+      for (File file : outputDir.listFiles())
          file.delete();
    }
 
@@ -223,10 +223,10 @@ abstract class AbstractConfigTest {
       URI caUri = new File("src/test/resources", "service-ca.crt").toURI();
       String yaml =
             "jgroups:\n" +
-            "  encrypt: true\n" +
-            "keystore:\n" +
-            "  caFile: '" + caUri.getPath() + "'\n" +
-            "  crtPath: " + caUri.resolve(".").getPath();
+                  "  encrypt: true\n" +
+                  "keystore:\n" +
+                  "  caFile: '" + caUri.getPath() + "'\n" +
+                  "  crtPath: " + caUri.resolve(".").getPath();
 
       Path configPath = Paths.get(outputDir.getAbsolutePath(), "jgroups-encryption-keystore");
       Files.writeString(configPath, yaml);

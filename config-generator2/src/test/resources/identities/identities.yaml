@@ -2,10 +2,10 @@ credentials:
   - username: user1
     password: pass
     roles:
-    - admin
-    - rockstar
+      - admin
+      - rockstar
 
   - username: user2
     password: pass
     roles:
-    - non-admin
+      - non-admin

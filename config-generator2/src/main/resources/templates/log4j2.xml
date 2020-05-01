@@ -12,9 +12,9 @@
                      fileName="{logging.file.path}"
                      filePattern="{logging.file.path}.%d\{yyyy-MM-dd}-%i">
             <Policies>
-                <OnStartupTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="100 MB" />
-                <TimeBasedTriggeringPolicy />
+                <OnStartupTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <TimeBasedTriggeringPolicy/>
             </Policies>
             <PatternLayout pattern="{logging.file.pattern}"/>
         </RollingFile>

@@ -7,11 +7,11 @@ import io.quarkus.test.junit.QuarkusTest;
 @QuarkusTest
 public class MainTest extends AbstractConfigTest {
 
-    @Inject
-    Main main;
+   @Inject
+   Main main;
 
-    @Override
-    void execute(String... args) {
-        main.run(args);
-    }
+   @Override
+   void execute(String... args) {
+      main.run(args);
+   }
 }

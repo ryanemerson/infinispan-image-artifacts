@@ -44,7 +44,7 @@ class Identities {
             groups.put(username, String.join(",", roles));
 
          try (Writer usersWriter = new FileWriter(new File(outputDir, "users.properties"));
-         Writer groupsWriter = new FileWriter(new File(outputDir, "groups.properties"))) {
+              Writer groupsWriter = new FileWriter(new File(outputDir, "groups.properties"))) {
             users.store(usersWriter, "$REALM_NAME=default$");
             groups.store(groupsWriter, null);
          }

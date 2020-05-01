@@ -57,7 +57,8 @@
                     </server-identities>
                     {/if}
                     <properties-realm groups-attribute="Roles">
-                        <user-properties path="users.properties" relative-to="infinispan.server.config.path" plain-text="true"/>
+                        <user-properties path="users.properties" relative-to="infinispan.server.config.path"
+                                         plain-text="true"/>
                         <group-properties path="groups.properties" relative-to="infinispan.server.config.path"/>
                     </properties-realm>
                 </security-realm>
@@ -70,7 +71,7 @@
                 {#if endpoints.hotrod.auth}
                 <authentication>
                     <sasl mechanisms="SCRAM-SHA-512 SCRAM-SHA-384 SCRAM-SHA-256 SCRAM-SHA-1 DIGEST-SHA-512 DIGEST-SHA-384 DIGEST-SHA-256 DIGEST-SHA DIGEST-MD5 PLAIN"
-                          qop="{endpoints.hotrod.qop}" server-name="{endpoints.hotrod.serverName}" />
+                          qop="{endpoints.hotrod.qop}" server-name="{endpoints.hotrod.serverName}"/>
                 </authentication>
                 {/if}
             </hotrod-connector>
