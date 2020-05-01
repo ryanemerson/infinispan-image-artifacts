@@ -16,7 +16,7 @@
                 <SizeBasedTriggeringPolicy size="100 MB" />
                 <TimeBasedTriggeringPolicy />
             </Policies>
-            <PatternLayout pattern="${logging.file.pattern}"/>
+            <PatternLayout pattern="{logging.file.pattern}"/>
         </RollingFile>
     </Appenders>
 

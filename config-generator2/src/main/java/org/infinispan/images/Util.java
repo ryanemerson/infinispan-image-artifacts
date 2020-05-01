@@ -57,4 +57,9 @@ public class Util {
       }
       return (T) config.get(path);
    }
+
+   static void exec(String... args) throws InterruptedException, IOException {
+      Process process = new ProcessBuilder().command(args).inheritIO().start();
+      process.waitFor();
+   }
 }

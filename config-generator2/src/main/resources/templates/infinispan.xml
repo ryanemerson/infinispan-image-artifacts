@@ -9,7 +9,7 @@
     <jgroups>
         <stack-file name="image-{jgroups.transport}" path="jgroups-{jgroups.transport}.xml"/>
 
-        {#if xsite?.backups}
+        {#if xsite.backups}
         <stack-file name="relay-global" path="jgroups-relay.xml"/>
 
         <stack name="xsite" extends="image-{jgroups.transport}">
@@ -26,7 +26,8 @@
     </jgroups>
 
     <cache-container name="default" statistics="true">
-        <transport cluster="{infinispan.clusterName}" {#if xsite?.backups}stack="xsite"{#else}stack="image-{jgroups.transport}"{/if}/>
+        <transport cluster="{infinispan.clusterName}"
+        {#if xsite.backups}stack="xsite"{#else}stack="image-{jgroups.transport}"{/if}/>
     </cache-container>
 
     <server xmlns="urn:infinispan:server:11.0">
@@ -46,7 +47,7 @@
         <security>
             <security-realms>
                 <security-realm name="default">
-                    {#if keystore && keystore.path}
+                    {#if keystore and keystore.path}
                     <server-identities>
                         <ssl>
                             <keystore path="{keystore.path}" alias="{keystore.alias}"
@@ -80,19 +81,19 @@
                 {#if endpoints.rest.auth}
                 <authentication mechanisms="DIGEST"/>
                 {/if}
+                {#if endpoints.rest.cors}
                 <cors-rules>
-                    {#if endpoints.rest?.cors}
-                       {#for rule in endpoints.rest?.cors}
-                    <cors-rule name="{rule.name}" allow-credentials="{rule.allowCredentials ?: 'false'}"
-                               max-age-seconds="{rule.maxAgeSeconds ?: 0}">
-                        {#if rule.allowedOrigins}<allowed-origins>{rule.allowedOrigins.join(',')}</allowed-origins>{/}
-                        {#if rule.allowedMethods}<allowed-origins>{rule.allowedMethods.join(',')}</allowed-origins>{/}
-                        {#if rule.allowedHeaders}<allowed-origins>{rule.allowedHeaders.join(',')}</allowed-origins>{/}
-                        {#if rule.exposeHeaders}<allowed-origins>{rule.exposeHeaders.join(',')}</allowed-origins>{/}
+                    {#for rule in endpoints.rest.cors}
+                    <cors-rule name="{rule.name}" allow-credentials="{rule.allowCredentials or 'false'}"
+                               max-age-seconds="{rule.maxAgeSeconds or 0}">
+                        {rule.allowedOrigins.listElement('allowed-origins') or ''}
+                        {rule.allowedMethods.listElement('allowed-methods') or ''}
+                        {rule.allowedHeaders.listElement('allowed-headers') or ''}
+                        {rule.exposeHeaders.listElement('expose-headers') or ''}
                     </cors-rule>
-                        {/for}
-                    {/if}
+                    {/for}
                 </cors-rules>
+                {/if}
             </rest-connector>
             {/if}
 

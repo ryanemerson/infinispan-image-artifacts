@@ -1,0 +1,3 @@
+jgroups:
+  transport: udp
+  diagnostics: true

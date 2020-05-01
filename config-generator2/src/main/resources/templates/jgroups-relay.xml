@@ -2,18 +2,19 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="urn:org:jgroups http://www.jgroups.org/schema/jgroups-4.0.xsd"
         xmlns:gsp="http://groovy.codehaus.org/2005/gsp">
-    <TCP bind_addr="${jgroups.bindAddress}"
+    <TCP bind_addr="{jgroups.bindAddress}"
          bind_port="7900"
-         enable_diagnostics="${jgroups.diagnostics}"
-         external_addr="${xsite.address}"
-         external_port="${xsite.port}"
+         enable_diagnostics="{jgroups.diagnostics}"
+         external_addr="{xsite.address}"
+         external_port="{xsite.port}"
          port_range="0"
     />
 
+    // TODO fix
     <gsp:scriptlet>
         def remoteSites = xsite.backups.collect { "$it.address[$it.port]" } join ","
     </gsp:scriptlet>
-    <TCPPING initial_hosts="${xsite.address}[${xsite.port}],${remoteSites}"
+    <TCPPING initial_hosts="{xsite.address}[{xsite.port}],{remoteSites}"
              port_range="0"
     />
 
