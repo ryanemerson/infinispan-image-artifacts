@@ -71,12 +71,19 @@
         <jboss.releases.repo.url>${jboss.releases.nexus.url}/service/local/staging/deploy/maven2/
         </jboss.releases.repo.url>
 
+        <version.maven.checkstyle.plugin>3.0.0</version.maven.checkstyle.plugin>
         <version.maven.nexus-staging>1.6.8</version.maven.nexus-staging>
+        <version.maven.source>3.0.1</version.maven.source>
     </properties>
 
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${version.maven.source}</version>
+                </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
                     <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -109,6 +116,25 @@
                     </execution>
                 </executions>
                 <inherited>true</inherited>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${version.maven.checkstyle.plugin}</version>
+                <inherited>true</inherited>
+                <configuration>
+                    <configLocation>checkstyle.xml</configLocation>
+                    <consoleOutput>true</consoleOutput>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>checkstyle</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
