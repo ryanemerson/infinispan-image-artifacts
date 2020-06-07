@@ -10,7 +10,7 @@
         <stack-file name="image-{jgroups.transport}" path="jgroups-{jgroups.transport}.xml"/>
 
         {#if xsite.backups}
-        <stack-file name="relay-global" path="jgroups-relay.xml"/>
+        <stack-file name="relay-global" path="jgroups-relay-{xsite.transport}.xml"/>
 
         <stack name="xsite" extends="image-{jgroups.transport}">
             <relay.RELAY2 xmlns="urn:org:jgroups" site="{xsite.name}" max_site_masters="{xsite.maxSiteMasters}"

@@ -42,14 +42,19 @@ public class ConfigGenerator {
    static final String LOGGING_FILE = "log4j2.xml";
    static final String JGROUPS_UDP_FILE = "jgroups-udp.xml";
    static final String JGROUPS_TCP_FILE = "jgroups-tcp.xml";
-   static final String JGROUPS_RELAY_FILE = "jgroups-relay.xml";
+   static final String JGROUPS_RELAY_TCP_FILE = "jgroups-relay-tcp.xml";
+   static final String JGROUPS_RELAY_TUNNEL_FILE = "jgroups-relay-tunnel.xml";
 
    @Inject
    Template infinispan;
 
    @Inject
-   @ResourcePath(JGROUPS_RELAY_FILE)
-   Template jgroupsRelay;
+   @ResourcePath(JGROUPS_RELAY_TCP_FILE)
+   Template jgroupsRelayTcp;
+
+   @Inject
+   @ResourcePath(JGROUPS_RELAY_TUNNEL_FILE)
+   Template jgroupsRelayTunnel;
 
    @Inject
    @ResourcePath(JGROUPS_TCP_FILE)
@@ -104,7 +109,22 @@ public class ConfigGenerator {
             .collect(Collectors.joining(","));
 
       config.put("remoteSites", remoteSites);
-      createFileAndRenderTemplate(outputDir, JGROUPS_RELAY_FILE, config, jgroupsRelay);
+
+      String fileName;
+      Template template;
+
+      String transport = get(config, "xsite.transport");
+      if ("tcp".equalsIgnoreCase(transport)) {
+         fileName = JGROUPS_RELAY_TCP_FILE;
+         template = jgroupsRelayTcp;
+      } else if ("tunnel".equalsIgnoreCase(transport)) {
+         fileName = JGROUPS_RELAY_TUNNEL_FILE;
+         template = jgroupsRelayTunnel;
+      } else {
+         throw new RuntimeException("Unsupported transport " + transport);
+      }
+
+      createFileAndRenderTemplate(outputDir, fileName, config, template);
    }
 
    void configureKeystore(Map<String, Object> config, File outputDir) throws Exception {

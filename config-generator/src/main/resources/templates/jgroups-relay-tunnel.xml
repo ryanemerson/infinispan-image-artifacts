@@ -1,0 +1,33 @@
+<config xmlns="urn:org:jgroups"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:org:jgroups http://www.jgroups.org/schema/jgroups-4.2.xsd"
+>
+    <TUNNEL bind_addr="{jgroups.bindAddress}"
+            bind_port="7900"
+            enable_diagnostics="{jgroups.diagnostics}"
+            port_range="0"
+            gossip_router_hosts="{xsite.address}[{xsite.port}],{remoteSites}"
+    />
+
+    <PING return_entire_cache="true"/>
+
+    <MERGE3/>
+
+    <FD_SOCK client_bind_port="57600" start_port="57600"/>
+
+    <FD_ALL timeout="180000"/>
+
+    <VERIFY_SUSPECT/>
+
+    <pbcast.NAKACK2 use_mcast_xmit="false"/>
+
+    <UNICAST3/>
+
+    <pbcast.STABLE/>
+
+    <pbcast.GMS/>
+
+    <MFC/>
+
+    <FRAG3/>
+</config>

@@ -25,6 +25,8 @@ keystore:
 xsite:
   masterCandidate: true
   maxSiteMasters: 1
+  transport: tcp
+
 logging:
   console:
     level: trace
