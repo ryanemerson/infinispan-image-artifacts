@@ -284,6 +284,11 @@ abstract class AbstractMainTest {
       infinispan.hasXPath(stack + "/i:remote-sites/i:remote-site[2]")
             .haveAttribute("name", "NYC");
 
+      infinispan.hasXPath(stack + "/j:relay.RELAY2")
+            .haveAttribute("max_site_masters", "8")
+            .haveAttribute("can_become_site_master", "false")
+            .haveAttribute("site", "LON");
+
       XmlAssert relay = jgroupsRelay();
       relay.hasXPath("//j:config/j:TCP")
             .haveAttribute("external_addr", "lon-addr")

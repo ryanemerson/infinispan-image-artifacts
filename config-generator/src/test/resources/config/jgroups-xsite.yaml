@@ -1,6 +1,7 @@
 xsite:
   address: lon-addr
   masterCandidate: false
+  maxSiteMasters: 8
   name: LON
   port: 7200
   backups:

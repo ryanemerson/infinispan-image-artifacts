@@ -24,7 +24,7 @@ keystore:
   type: pkcs12
 xsite:
   masterCandidate: true
-
+  maxSiteMasters: 1
 logging:
   console:
     level: trace
