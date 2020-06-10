@@ -268,7 +268,7 @@ abstract class AbstractMainTest {
 
       infinispan.hasXPath(jgroups + "/i:stack-file[2]")
             .haveAttribute("name", "relay-global")
-            .haveAttribute("path", "jgroups-relay-tcp.xml");
+            .haveAttribute("path", "jgroups-relay.xml");
 
       infinispan.hasXPath("//i:infinispan/i:cache-container/i:transport")
             .haveAttribute("stack", "xsite");
@@ -289,7 +289,7 @@ abstract class AbstractMainTest {
             .haveAttribute("can_become_site_master", "false")
             .haveAttribute("site", "LON");
 
-      XmlAssert relay = jgroupsRelay(false);
+      XmlAssert relay = jgroupsRelay();
       relay.hasXPath("//j:config/j:TCP")
             .haveAttribute("external_addr", "lon-addr")
             .haveAttribute("external_port", "7200");
@@ -310,7 +310,7 @@ abstract class AbstractMainTest {
 
       infinispan.hasXPath(jgroups + "/i:stack-file[2]")
             .haveAttribute("name", "relay-global")
-            .haveAttribute("path", "jgroups-relay-tunnel.xml");
+            .haveAttribute("path", "jgroups-relay.xml");
 
       infinispan.hasXPath("//i:infinispan/i:cache-container/i:transport")
             .haveAttribute("stack", "xsite");
@@ -326,7 +326,7 @@ abstract class AbstractMainTest {
       infinispan.hasXPath(stack + "/i:remote-sites/i:remote-site[2]")
             .haveAttribute("name", "NYC");
 
-      XmlAssert relay = jgroupsRelay(true);
+      XmlAssert relay = jgroupsRelay();
       relay.hasXPath("//j:config/j:TUNNEL")
             .haveAttribute("gossip_router_hosts", "lon-addr[7200],nyc-addr[7200]");
    }
@@ -383,10 +383,8 @@ abstract class AbstractMainTest {
       return jgroups(config);
    }
 
-   private XmlAssert jgroupsRelay(boolean tunnel) throws Exception {
-      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), tunnel ?
-            ConfigGenerator.JGROUPS_RELAY_TUNNEL_FILE :
-            ConfigGenerator.JGROUPS_RELAY_TCP_FILE));
+   private XmlAssert jgroupsRelay() throws Exception {
+      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.JGROUPS_RELAY_FILE));
       return jgroups(config);
    }
 
