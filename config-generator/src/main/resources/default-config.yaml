@@ -28,7 +28,7 @@ xsite:
 logging:
   console:
     level: trace
-    pattern: '%highlight{%d{HH:mm:ss,SSS} %-5p (%t) [%c] %m%throwable}{INFO=normal, DEBUG=normal, TRACE=normal}%n'
+    pattern: '%d{HH:mm:ss,SSS} %-5p (%t) [%c] %m%throwable%n'
   file:
     level: trace
     path: '${sys:infinispan.server.log.path}/server.log'
