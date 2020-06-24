@@ -62,7 +62,7 @@ abstract class AbstractMainTest {
    void testChangeInfinispanServerName() throws Exception {
       generate("server-name")
             .infinispan()
-            .hasXPath("//i:infinispan/i:cache-container/i:transport[@cluster='customClusterName']");
+            .hasXPath("//i:infinispan/i:cache-container/i:transport[@cluster='${infinispan.cluster.name:customClusterName}']");
    }
 
    @Test
@@ -184,49 +184,51 @@ abstract class AbstractMainTest {
 
    @Test
    void testJGroupsUdp() throws Exception {
-      XmlAssert xml = generate("jgroups-udp").jgroupsUdp();
-      testJgroupsDiagnostics(xml, "udp", false);
+      XmlAssert xml = generate("jgroups-udp").infinispan();
+      assertStack(xml, "image-udp", "i:UDP")
+            .haveAttribute("enable_diagnostics", Boolean.toString(false));
    }
 
    @Test
    void testJGroupsDiagnosticsUdp() throws Exception {
-      XmlAssert xml = generate("jgroups-diagnostics-udp").jgroupsUdp();
-      testJgroupsDiagnostics(xml, "udp", true);
+      XmlAssert xml = generate("jgroups-diagnostics-udp").infinispan();
+      assertStack(xml, "image-udp", "i:UDP")
+            .haveAttribute("enable_diagnostics", Boolean.toString(true));
    }
 
    @Test
    void testJGroupsTcp() throws Exception {
-      XmlAssert xml = generateDefault().jgroupsTcp();
-      testJgroupsDiagnostics(xml, "tcp", false)
-            .haveAttribute("bind_addr", InetAddress.getLocalHost().getHostAddress());
+      testJGroupsTcp(false);
    }
 
    @Test
    void testJGroupsDiagnosticsTcp() throws Exception {
-      XmlAssert xml = generate("jgroups-diagnostics-tcp").jgroupsTcp();
-      testJgroupsDiagnostics(xml, "tcp", true)
-            .haveAttribute("bind_addr", InetAddress.getLocalHost().getHostAddress());
+      testJGroupsTcp(true);
    }
 
-   MultipleNodeAssert testJgroupsDiagnostics(XmlAssert xml, String protocol, boolean enabled) throws Exception {
-      return xml.hasXPath(String.format("//j:config/j:%s", protocol.toUpperCase()))
-            .haveAttribute("enable_diagnostics", Boolean.toString(enabled));
+   private void testJGroupsTcp(boolean diagnosticsEnabled) throws Exception {
+      XmlAssert xml = generate("jgroups-diagnostics-tcp").infinispan();
+      String bindProperty = String.format("${jgroups.bind.address,jgroups.tcp.address:%s}", InetAddress.getLocalHost().getHostAddress());
+      assertStack(xml, "i:TCP")
+            .haveAttribute("enable_diagnostics", Boolean.toString(true))
+            .haveAttribute("bind_addr", bindProperty);
+      assertStack(xml, "i:MPING");
    }
 
    @Test
    void testJGroupsEncryptionDefault() throws Exception {
-      XmlAssert xml = generateDefault().jgroupsTcp();
+      XmlAssert xml = generateDefault().infinispan();
       xml.doesNotHaveXPath("//j:config/j:ASYM_ENCRYPT");
       xml.doesNotHaveXPath("//j:config/j:SERIALIZE");
    }
 
    @Test
    void testJGroupsEncryptionEnabled() throws Exception {
-      XmlAssert xml = generate("jgroups-encryption").jgroupsTcp();
-      xml.hasXPath("//j:config/j:ASYM_ENCRYPT")
+      XmlAssert xml = generate("jgroups-encryption").infinispan();
+      assertStack(xml, "i:ASYM_ENCRYPT")
             .haveAttribute("use_external_key_exchange", "false");
 
-      xml.hasXPath("//j:config/j:SERIALIZE");
+      assertStack(xml, "i:SERIALIZE");
    }
 
    @Test
@@ -244,16 +246,17 @@ abstract class AbstractMainTest {
       Files.writeString(configPath, yaml);
       assertEquals(CommandLine.ExitCode.OK, execute(String.format("--config=%s", configPath), outputDir.getAbsolutePath()));
 
-      XmlAssert xml = jgroupsTcp();
-      xml.hasXPath("//j:config/j:SSL_KEY_EXCHANGE")
+      XmlAssert xml = infinispan();
+
+      assertStack(xml, "i:SSL_KEY_EXCHANGE")
             .haveAttribute("keystore_name", new File(outputDir, "keystores/keystore.p12").getAbsolutePath())
             .haveAttribute("keystore_password", "infinispan")
             .haveAttribute("keystore_type", "pkcs12");
 
-      xml.hasXPath("//j:config/j:ASYM_ENCRYPT")
+      assertStack(xml, "i:ASYM_ENCRYPT")
             .haveAttribute("use_external_key_exchange", "true");
 
-      xml.hasXPath("//j:config/j:SERIALIZE");
+      assertStack(xml, "i:SERIALIZE");
    }
 
    @Test
@@ -261,30 +264,25 @@ abstract class AbstractMainTest {
       generate("jgroups-xsite");
 
       XmlAssert infinispan = infinispan();
-      String jgroups = "//i:infinispan/i:jgroups";
-      infinispan.hasXPath(jgroups + "/i:stack-file[1]")
-            .haveAttribute("name", "image-tcp")
-            .haveAttribute("path", "jgroups-tcp.xml");
 
-      infinispan.hasXPath(jgroups + "/i:stack-file[2]")
-            .haveAttribute("name", "relay-global")
+      assertStack(infinispan, null);
+
+      assertStackFile(infinispan, "relay-global")
             .haveAttribute("path", "jgroups-relay.xml");
 
       infinispan.hasXPath("//i:infinispan/i:cache-container/i:transport")
             .haveAttribute("stack", "xsite");
 
-      String stack = jgroups + "/i:stack";
-      infinispan.hasXPath(stack)
-            .haveAttribute("name", "xsite")
+      assertStack(infinispan, "xsite", null)
             .haveAttribute("extends", "image-tcp");
 
-      infinispan.hasXPath(stack + "/i:remote-sites/i:remote-site[1]")
+      assertStack(infinispan, "xsite", "/i:remote-sites/i:remote-site[1]")
             .haveAttribute("name", "LON");
 
-      infinispan.hasXPath(stack + "/i:remote-sites/i:remote-site[2]")
+      assertStack(infinispan, "xsite", "/i:remote-sites/i:remote-site[2]")
             .haveAttribute("name", "NYC");
 
-      infinispan.hasXPath(stack + "/j:relay.RELAY2")
+      assertStack(infinispan, "xsite", "/j:relay.RELAY2")
             .haveAttribute("max_site_masters", "8")
             .haveAttribute("can_become_site_master", "false")
             .haveAttribute("site", "LON");
@@ -303,27 +301,23 @@ abstract class AbstractMainTest {
       generate("jgroups-xsite-tunnel");
 
       XmlAssert infinispan = infinispan();
-      String jgroups = "//i:infinispan/i:jgroups";
-      infinispan.hasXPath(jgroups + "/i:stack-file[1]")
-            .haveAttribute("name", "image-tcp")
-            .haveAttribute("path", "jgroups-tcp.xml");
 
-      infinispan.hasXPath(jgroups + "/i:stack-file[2]")
+      assertStack(infinispan, null);
+
+      assertStackFile(infinispan, "relay-global")
             .haveAttribute("name", "relay-global")
             .haveAttribute("path", "jgroups-relay.xml");
 
       infinispan.hasXPath("//i:infinispan/i:cache-container/i:transport")
             .haveAttribute("stack", "xsite");
 
-      String stack = jgroups + "/i:stack";
-      infinispan.hasXPath(stack)
-            .haveAttribute("name", "xsite")
+      assertStack(infinispan, "xsite", null)
             .haveAttribute("extends", "image-tcp");
 
-      infinispan.hasXPath(stack + "/i:remote-sites/i:remote-site[1]")
+      assertStack(infinispan, "xsite", "/i:remote-sites/i:remote-site[1]")
             .haveAttribute("name", "LON");
 
-      infinispan.hasXPath(stack + "/i:remote-sites/i:remote-site[2]")
+      assertStack(infinispan, "xsite", "/i:remote-sites/i:remote-site[2]")
             .haveAttribute("name", "NYC");
 
       XmlAssert relay = jgroupsRelay();
@@ -347,6 +341,22 @@ abstract class AbstractMainTest {
       assertEquals("non-admin", groupProps.get("user2"));
    }
 
+   MultipleNodeAssert assertStack(XmlAssert xml, String path) {
+      return assertStack(xml, "image-tcp", path);
+   }
+
+   MultipleNodeAssert assertStack(XmlAssert xml, String name, String path) {
+      String stack = String.format("(//i:infinispan/i:jgroups/i:stack[@name='%s'])[1]", name);
+      if (path != null)
+         stack = String.format("%s/%s", stack, path);
+      return xml.hasXPath(stack);
+   }
+
+   MultipleNodeAssert assertStackFile(XmlAssert xmlAssert, String file) {
+      String path = String.format("(//i:infinispan/i:jgroups/i:stack-file[@name='%s'])[1]", file);
+      return xmlAssert.hasXPath(path);
+   }
+
    private AbstractMainTest generateDefault() throws Exception {
       assertEquals(CommandLine.ExitCode.OK, execute(outputDir.getAbsolutePath()));
       return this;
@@ -360,7 +370,6 @@ abstract class AbstractMainTest {
 
    private XmlAssert infinispan() throws Exception {
       String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.INFINISPAN_FILE));
-
       Map<String, String> prefix2Uri = new HashMap<>();
       prefix2Uri.put("i", "urn:infinispan:config:11.0");
       prefix2Uri.put("s", "urn:infinispan:server:11.0");
@@ -371,16 +380,6 @@ abstract class AbstractMainTest {
    private XmlAssert logging() throws Exception {
       String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.LOGGING_FILE));
       return assertThat(config);
-   }
-
-   private XmlAssert jgroupsUdp() throws Exception {
-      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.JGROUPS_UDP_FILE));
-      return jgroups(config);
-   }
-
-   private XmlAssert jgroupsTcp() throws Exception {
-      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.JGROUPS_TCP_FILE));
-      return jgroups(config);
    }
 
    private XmlAssert jgroupsRelay() throws Exception {

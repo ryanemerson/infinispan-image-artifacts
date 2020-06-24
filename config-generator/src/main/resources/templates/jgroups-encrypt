@@ -6,6 +6,7 @@
             keystore_type="{keystore.type}"
             port="2157"
             port_range="0"
+            stack.combine="INSERT_AFTER" stack.position="VERIFY_SUSPECT"
     />
     {/if}
     <ASYM_ENCRYPT use_external_key_exchange="{#if keystore.path}true{#else}false{/if}"
@@ -13,6 +14,7 @@
             sym_keylength="128"
             asym_algorithm="RSA"
             asym_keylength="512"
+            stack.combine="INSERT_AFTER" stack.position="{#if keystore.path}SSL_KEY_EXCHANGE{#else}VERIFY_SUSPECT{/if}"
     />
-    <SERIALIZE />
+    <SERIALIZE stack.combine="INSERT_AFTER" stack.position="ASYM_ENCRYPT"/>
 {/if}
