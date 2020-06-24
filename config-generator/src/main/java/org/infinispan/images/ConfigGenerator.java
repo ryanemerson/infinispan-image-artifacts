@@ -40,8 +40,6 @@ public class ConfigGenerator {
 
    static final String INFINISPAN_FILE = "infinispan.xml";
    static final String LOGGING_FILE = "log4j2.xml";
-   static final String JGROUPS_UDP_FILE = "jgroups-udp.xml";
-   static final String JGROUPS_TCP_FILE = "jgroups-tcp.xml";
    static final String JGROUPS_RELAY_FILE = "jgroups-relay.xml";
 
    @Inject
@@ -50,14 +48,6 @@ public class ConfigGenerator {
    @Inject
    @ResourcePath(JGROUPS_RELAY_FILE)
    Template jgroupsRelay;
-
-   @Inject
-   @ResourcePath(JGROUPS_TCP_FILE)
-   Template jgroupsTcp;
-
-   @Inject
-   @ResourcePath(JGROUPS_UDP_FILE)
-   Template jgroupsUdp;
 
    @Inject
    Template log4j2;
@@ -74,24 +64,14 @@ public class ConfigGenerator {
       // Configure  keystores if required
       configureKeystore(config, outputDir);
 
-      // Generate JGroups stack files
-      configureJGroups(config, outputDir);
+      // Generate JGroups Xsite stack files
+      configureJGroupsRelay(config, outputDir);
 
       // Generate Logging configuration
       createFileAndRenderTemplate(outputDir, LOGGING_FILE, config, log4j2);
 
       // Generate Infinispan configuration
       createFileAndRenderTemplate(outputDir, INFINISPAN_FILE, config, infinispan);
-   }
-
-   void configureJGroups(Map<String, Object> config, File outputDir) throws Exception {
-      String transport = get(config, "jgroups.transport");
-      boolean udp = "udp".equalsIgnoreCase(transport);
-      Template template = udp ? jgroupsUdp : jgroupsTcp;
-      String fileName = udp ? JGROUPS_UDP_FILE : JGROUPS_TCP_FILE;
-      createFileAndRenderTemplate(outputDir, fileName, config, template);
-
-      configureJGroupsRelay(config, outputDir);
    }
 
    void configureJGroupsRelay(Map<String, Object> config, File outputDir) throws Exception {

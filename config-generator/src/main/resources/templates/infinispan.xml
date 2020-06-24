@@ -7,14 +7,41 @@
         xmlns:server="urn:infinispan:server:11.0">
 
     <jgroups>
-        <stack-file name="image-{jgroups.transport}" path="jgroups-{jgroups.transport}.xml"/>
+        <stack name="image-tcp" extends="tcp">
+            <TCP bind_addr="$\{jgroups.bind.address,jgroups.tcp.address:{jgroups.bindAddress}\}"
+                 bind_port="$\{jgroups.bind.port,jgroups.tcp.port:7800\}"
+                 enable_diagnostics="{jgroups.diagnostics}"/>
+
+            {#if jgroups.dnsPing.query}
+            <dns.DNS_PING dns_address="{jgroups.dnsPing.address}" dns_query="{jgroups.dnsPing.query}"
+                          dns_record_type="{jgroups.dnsPing.recordType}"
+                          stack.combine="REPLACE" stack.position="MPING"/>
+            {#else}
+            <MPING bind_addr="$\{jgroups.bind.address,jgroups.tcp.address:{jgroups.bindAddress}\}"/>
+            {/if}
+            {#include jgroups-encrypt/}
+        </stack>
+
+        <stack name="image-udp" extends="udp">
+            <UDP enable_diagnostics="{jgroups.diagnostics}"
+                 port_range="0"
+            />
+
+            {#if jgroups.dnsPing.query}
+            <dns.DNS_PING dns_address="{jgroups.dnsPing.address}" dns_query="{jgroups.dnsPing.query}"
+                          dns_record_type="{jgroups.dnsPing.recordType}"
+                          stack.combine="REPLACE" stack.position="PING"/>
+            {/if}
+            {#include jgroups-encrypt/}
+            <FD_SOCK client_bind_port="57600" start_port="57600"/>
+        </stack>
 
         {#if xsite.backups}
         <stack-file name="relay-global" path="jgroups-relay.xml"/>
 
         <stack name="xsite" extends="image-{jgroups.transport}">
             <relay.RELAY2 xmlns="urn:org:jgroups" site="{xsite.name}" max_site_masters="{xsite.maxSiteMasters}"
-                                  can_become_site_master="{xsite.masterCandidate}"/>
+                          can_become_site_master="{xsite.masterCandidate}"/>
             <remote-sites default-stack="relay-global">
                 <remote-site name="{xsite.name}"/>
                 {#each xsite.backups}
@@ -26,8 +53,8 @@
     </jgroups>
 
     <cache-container name="default" statistics="true">
-        <transport cluster="{infinispan.clusterName}"
-        {#if xsite.backups}stack="xsite"{#else}stack="image-{jgroups.transport}"{/if}/>
+        <transport cluster="$\{infinispan.cluster.name:{infinispan.clusterName}\}" node-name="$\{infinispan.node.name:\}"
+        {#if xsite.backups}stack="xsite"{#else}stack="$\{infinispan.cluster.stack:image-{jgroups.transport}\}"{/if}/>
     </cache-container>
 
     <server xmlns="urn:infinispan:server:11.0">
@@ -37,8 +64,8 @@
             </interface>
         </interfaces>
 
-        <socket-bindings default-interface="public" port-offset="0">
-            <socket-binding name="default" port="11222"/>
+        <socket-bindings default-interface="public" port-offset="$\{infinispan.socket.binding.port-offset:0\}">
+            <socket-binding name="default" port="$\{infinispan.bind.port:11222\}"/>
             {#if endpoints.memcached.enabled}
             <socket-binding name="memcached" port="11221"/>
             {/if}
