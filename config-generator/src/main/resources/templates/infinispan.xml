@@ -33,7 +33,7 @@
     <server xmlns="urn:infinispan:server:11.0">
         <interfaces>
             <interface name="public">
-                <inet-address value="{jgroups.bindAddress}"/>
+                <inet-address value="$\{infinispan.bind.address:{jgroups.bindAddress}\}"/>
             </interface>
         </interfaces>
 
