@@ -240,9 +240,7 @@ abstract class AbstractMainTest {
                   "  caFile: '" + caUri.getPath() + "'\n" +
                   "  crtPath: " + caUri.resolve(".").getPath();
 
-      Path configPath = Paths.get(outputDir.getAbsolutePath(), "jgroups-encryption-keystore");
-      Files.writeString(configPath, yaml);
-      assertEquals(CommandLine.ExitCode.OK, execute(String.format("--config=%s", configPath), outputDir.getAbsolutePath()));
+      writeYamlAndGenerate(yaml, "jgroups-encryption-keystore");
 
       XmlAssert xml = jgroupsTcp();
       xml.hasXPath("//j:config/j:SSL_KEY_EXCHANGE")
@@ -296,6 +294,90 @@ abstract class AbstractMainTest {
 
       relay.hasXPath("//j:config/j:TCPPING")
             .haveAttribute("initial_hosts", "lon-addr[7200],nyc-addr[7200]");
+   }
+
+   @Test
+   void testKeyStoreFromCrt() throws Exception {
+      // Generate Yaml config so we can set the absolute path of caFile and crtPath
+      URI caUri = new File("src/test/resources", "service-ca.crt").toURI();
+      String yaml =
+            "keystore:\n" +
+                  "  alias: customAlias\n" +
+                  "  password: customPassword\n" +
+                  "  caFile: '" + caUri.getPath() + "'\n" +
+                  "  crtPath: " + caUri.resolve(".").getPath();
+      testKeyStoreFromCrt(yaml, outputDir.getAbsolutePath() + "/keystores/keystore.p12");
+   }
+
+   @Test
+   void testKeyStoreFromCrtCustomPath() throws Exception {
+      // Generate Yaml config so we can set the absolute path of caFile and crtPath
+      URI caUri = new File("src/test/resources", "service-ca.crt").toURI();
+
+      // Test file with extension
+      String yaml =
+            "keystore:\n" +
+                  "  alias: customAlias\n" +
+                  "  password: customPassword\n" +
+                  "  path: " + outputDir.getAbsolutePath() + "/custom-dir/custom-keystore-name.p12\n" +
+                  "  caFile: '" + caUri.getPath() + "'\n" +
+                  "  crtPath: " + caUri.resolve(".").getPath();
+      testKeyStoreFromCrt(yaml, outputDir.getAbsolutePath() + "/custom-dir/custom-keystore-name.p12");
+
+      // Test file without extension
+      yaml =
+            "keystore:\n" +
+                  "  alias: customAlias\n" +
+                  "  password: customPassword\n" +
+                  "  path: " + outputDir.getAbsolutePath() + "/keystore\n" +
+                  "  caFile: '" + caUri.getPath() + "'\n" +
+                  "  crtPath: " + caUri.resolve(".").getPath();
+      testKeyStoreFromCrt(yaml, outputDir.getAbsolutePath() + "/keystore");
+   }
+
+   private void testKeyStoreFromCrt(String yaml, String keystorePath) throws Exception {
+      writeYamlAndGenerate(yaml, "keystore-crt-path");
+      XmlAssert xml = infinispan();
+
+      String path = "//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:server-identities/s:ssl/s:keystore";
+      xml.hasXPath(path)
+            .haveAttribute("alias", "customAlias")
+            .haveAttribute("keystore-password", "customPassword")
+            .haveAttribute("path", keystorePath)
+            .doNotHaveAttribute("generate-self-signed-certificate-host");
+   }
+
+   @Test
+   void testKeyStoreProvided() throws Exception {
+      // Generate Yaml config so we can set the absolute path of the provided keystore
+      URI caUri = new File("src/test/resources", "my-keystore.jks").toURI();
+      String yaml =
+            "keystore:\n" +
+                  "  type: jks\n" +
+                  "  password: password\n" +
+                  "  path: " + caUri.getPath();
+
+      writeYamlAndGenerate(yaml, "keystore-provided");
+      XmlAssert xml = infinispan();
+
+      String path = "//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:server-identities/s:ssl/s:keystore";
+      xml.hasXPath(path)
+            .haveAttribute("alias", "server")
+            .haveAttribute("keystore-password", "password")
+            .haveAttribute("path", caUri.getPath())
+            .doNotHaveAttribute("generate-self-signed-certificate-host");
+   }
+
+   @Test
+   void testKeystoreSelfSigned() throws Exception {
+      generate("keystore-self-signed");
+      XmlAssert xml = infinispan();
+
+      String path = "//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:server-identities/s:ssl/s:keystore";
+      xml.hasXPath(path)
+            .haveAttribute("alias", "server")
+            .haveAttribute("keystore-password", "infinispan")
+            .haveAttribute("generate-self-signed-certificate-host", "localhost");
    }
 
    @Test
@@ -355,6 +437,13 @@ abstract class AbstractMainTest {
    private AbstractMainTest generate(String configName) throws Exception {
       String path = new File("src/test/resources/config", configName + ".yaml").getAbsolutePath();
       assertEquals(CommandLine.ExitCode.OK, execute(String.format("--config=%s", path), outputDir.getAbsolutePath()));
+      return this;
+   }
+
+   private AbstractMainTest writeYamlAndGenerate(String yaml, String fileName) throws Exception {
+      Path configPath = Paths.get(outputDir.getAbsolutePath(), fileName);
+      Files.writeString(configPath, yaml);
+      assertEquals(CommandLine.ExitCode.OK, execute(String.format("--config=%s", configPath), outputDir.getAbsolutePath()));
       return this;
    }
 
