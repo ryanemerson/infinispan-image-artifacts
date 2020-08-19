@@ -79,7 +79,7 @@
                         <ssl>
                             <keystore path="{keystore.path}" alias="{keystore.alias}"
                                       keystore-password="{keystore.password}"
-                                      generate-self-signed-certificate-host="{keystore.selfSignCert ? 'localhost' : ''}"/>
+                                      {#if keystore.selfSignCert}generate-self-signed-certificate-host="localhost"{/if}/>
                         </ssl>
                     </server-identities>
                     {/if}
