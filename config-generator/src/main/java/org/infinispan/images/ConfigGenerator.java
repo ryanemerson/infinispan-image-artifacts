@@ -101,66 +101,73 @@ public class ConfigGenerator {
       }
 
       // If path is defined then ignore selfSignCert
-      ks.put("selfSignCert", "false");
+      ks.remove("selfSignCert");
 
-      // If ks.path == null then use default for keystore
+      String crtPath = ks.get("crtPath");
+      if (crtPath == null || crtPath.trim().isEmpty()) {
+         // No crtPath provided, so simply use the provided ks.path value
+         return;
+      }
+
+      // User has provided a key/cert in ks.crtPath, so build a keystore using them and store it in ks.path (overwriting
+      // any existing content in ks.path)
+      File keystore;
+      File ksRoot;
       String path = ks.get("path");
-      File ksRoot = path != null && !path.trim().isEmpty() ?
-            new File(path).getParentFile() :
-            new File(outputDir, "keystores");
+      if (path == null || path.trim().isEmpty()) {
+         ksRoot = new File(outputDir, "keystores");
+         keystore = new File(ksRoot, "keystore.p12");
+         ks.put("path", keystore.getAbsolutePath());
+      } else {
+         keystore = new File(path);
+         ksRoot = keystore.getParentFile();
+      }
       ksRoot.mkdirs();
 
-      // If user provides a key/cert in ks.crtPath then build a keystore from them and store it in ks.path (overwriting
-      // any eventual content in ks.path)
-      String crtPath = ks.get("crtPath");
-      if (crtPath != null && !crtPath.trim().isEmpty()) {
-         ks.putIfAbsent("path", new File(ksRoot, "keystore.p12").getPath());
+      String type = ks.get("type").toLowerCase();
+      File openSslStore = new File(ksRoot, "keystore." + type);
+      String password = ks.computeIfAbsent("password", k -> "infinispan");
+      char[] ksPass = password.toCharArray();
 
-         String type = ks.get("type").toLowerCase();
-         File keystore = new File(ksRoot, "keystore." + type);
-         String password = ks.computeIfAbsent("password", k -> "infinispan");
-         char[] ksPass = password.toCharArray();
+      String[] cmd = List.of(
+            "openssl",
+            "pkcs12",
+            "-export",
+            "-inkey",
+            new File(crtPath, "tls.key").getPath(),
+            "-in",
+            new File(crtPath, "tls.crt").getPath(),
+            "-out",
+            openSslStore.getPath(),
+            "-name",
+            ks.get("alias"),
+            "-password",
+            "pass:" + password
+      ).toArray(new String[0]);
 
-         String[] cmd = List.of(
-               "openssl",
-               "pkcs12",
-               "-export",
-               "-inkey",
-               new File(crtPath, "tls.key").getPath(),
-               "-in",
-               new File(crtPath, "tls.crt").getPath(),
-               "-out",
-               keystore.getPath(),
-               "-name",
-               ks.get("alias"),
-               "-password",
-               "pass:" + password
-         ).toArray(new String[0]);
+      exec(cmd);
 
-         exec(cmd);
+      // Load the pkcs12 keystore
+      KeyStore keyStore = KeyStore.getInstance(type);
+      try (InputStream is = new FileInputStream(openSslStore)) {
+         keyStore.load(is, ksPass);
+      }
 
-         // Load the pkcs12 keystore
-         KeyStore keyStore = KeyStore.getInstance(type);
-         try (InputStream is = new FileInputStream(keystore)) {
-            keyStore.load(is, ksPass);
+      // Add all certificates from provided CA file
+      CertificateFactory cf = CertificateFactory.getInstance("X.509");
+      List<String> certs = parseCAFile(ks.get("caFile"));
+
+      for (int i = 0; i < certs.size(); i++) {
+         String alias = "service-crt-" + (i < 10 ? "0" + i : i);
+         byte[] bytes = certs.get(i).getBytes(StandardCharsets.UTF_8);
+         try (InputStream is = Base64.getDecoder().wrap(new ByteArrayInputStream(bytes))) {
+            keyStore.setCertificateEntry(alias, cf.generateCertificate(is));
          }
+      }
 
-         // Add all certificates from provided CA file
-         CertificateFactory cf = CertificateFactory.getInstance("X.509");
-         List<String> certs = parseCAFile(ks.get("caFile"));
-
-         for (int i = 0; i < certs.size(); i++) {
-            String alias = "service-crt-" + (i < 10 ? "0" + i : i);
-            byte[] bytes = certs.get(i).getBytes(StandardCharsets.UTF_8);
-            try (InputStream is = Base64.getDecoder().wrap(new ByteArrayInputStream(bytes))) {
-               keyStore.setCertificateEntry(alias, cf.generateCertificate(is));
-            }
-         }
-
-         // Store the keystore
-         try (OutputStream os = new FileOutputStream(keystore)) {
-            keyStore.store(os, ksPass);
-         }
+      // Store the keystore
+      try (OutputStream os = new FileOutputStream(keystore)) {
+         keyStore.store(os, ksPass);
       }
    }
 
