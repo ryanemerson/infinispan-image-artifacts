@@ -54,7 +54,7 @@
 
     <cache-container name="default" statistics="true" zero-capacity-node="{infinispan.zeroCapacityNode}">
         <transport cluster="$\{infinispan.cluster.name:{infinispan.clusterName}\}" node-name="$\{infinispan.node.name:\}"
-        {#if xsite.backups}stack="xsite"{#else}stack="$\{infinispan.cluster.stack:image-{jgroups.transport}\}"{/if}/>
+        {#if xsite.backups}stack="xsite"{#else}stack="image-{jgroups.transport}"{/if}/>
     </cache-container>
 
     <server xmlns="urn:infinispan:server:11.0">
