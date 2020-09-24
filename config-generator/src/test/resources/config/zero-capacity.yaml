@@ -1,0 +1,2 @@
+infinispan:
+  zeroCapacityNode: true

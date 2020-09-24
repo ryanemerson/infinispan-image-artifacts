@@ -422,6 +422,18 @@ abstract class AbstractMainTest {
       assertEquals("non-admin", groupProps.get("user2"));
    }
 
+   @Test
+   void testZeroCapacityNode() throws Exception {
+      generate("zero-capacity")
+            .infinispan()
+            .hasXPath("//i:infinispan/i:cache-container[@zero-capacity-node='true']");
+
+      generateDefault()
+            .infinispan()
+            .hasXPath("//i:infinispan/i:cache-container[@zero-capacity-node='false']");
+   }
+
+
    MultipleNodeAssert assertStack(XmlAssert xml, String path) {
       return assertStack(xml, "image-tcp", path);
    }
