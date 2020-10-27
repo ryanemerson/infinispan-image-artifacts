@@ -1,12 +1,12 @@
 <infinispan
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="urn:infinispan:config:11.0 https://infinispan.org/schemas/infinispan-config-11.0.xsd
-                            urn:infinispan:server:11.0 https://infinispan.org/schemas/infinispan-server-11.0.xsd
-                            urn:infinispan:config:clustered-locks:11.0 https://infinispan.org/schemas/infinispan-clustered-locks-config-11.0.xsd
+        xsi:schemaLocation="urn:infinispan:config:12.0 https://infinispan.org/schemas/infinispan-config-12.0.xsd
+                            urn:infinispan:server:12.0 https://infinispan.org/schemas/infinispan-server-12.0.xsd
+                            urn:infinispan:config:clustered-locks:12.0 https://infinispan.org/schemas/infinispan-clustered-locks-config-12.0.xsd
                             urn:org:jgroups https://www.jgroups.org/schema/jgroups-4.2.xsd"
-        xmlns="urn:infinispan:config:11.0"
-        xmlns:server="urn:infinispan:server:11.0"
-        xmlns:locks="urn:infinispan:config:clustered-locks:11.0">
+        xmlns="urn:infinispan:config:12.0"
+        xmlns:server="urn:infinispan:server:12.0"
+        xmlns:locks="urn:infinispan:config:clustered-locks:12.0">
 
     <jgroups>
         <stack name="image-tcp" extends="tcp">
@@ -61,7 +61,7 @@
         <locks:clustered-locks num-owners="{infinispan.locks.owners}" reliability="{infinispan.locks.reliability.upperCase}"/>
     </cache-container>
 
-    <server xmlns="urn:infinispan:server:11.0">
+    <server xmlns="urn:infinispan:server:12.0">
         <interfaces>
             <interface name="public">
                 <inet-address value="$\{infinispan.bind.address:{jgroups.bindAddress}\}"/>
