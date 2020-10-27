@@ -433,6 +433,20 @@ abstract class AbstractMainTest {
             .hasXPath("//i:infinispan/i:cache-container[@zero-capacity-node='false']");
    }
 
+   @Test
+   void testClusteredLocks() throws Exception {
+      generateDefault()
+            .infinispan()
+            .hasXPath("//i:infinispan/i:cache-container/cl:clustered-locks")
+            .haveAttribute("num-owners", "-1")
+            .haveAttribute("reliability", "CONSISTENT");
+
+      generate("locks")
+            .infinispan()
+            .hasXPath("//i:infinispan/i:cache-container/cl:clustered-locks")
+            .haveAttribute("num-owners", "2")
+            .haveAttribute("reliability", "AVAILABLE");
+   }
 
    MultipleNodeAssert assertStack(XmlAssert xml, String path) {
       return assertStack(xml, "image-tcp", path);
@@ -472,6 +486,7 @@ abstract class AbstractMainTest {
       String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.INFINISPAN_FILE));
       Map<String, String> prefix2Uri = new HashMap<>();
       prefix2Uri.put("i", "urn:infinispan:config:11.0");
+      prefix2Uri.put("cl", "urn:infinispan:config:clustered-locks:11.0");
       prefix2Uri.put("s", "urn:infinispan:server:11.0");
       prefix2Uri.put("j", "urn:org:jgroups");
       return assertThat(config).withNamespaceContext(prefix2Uri);

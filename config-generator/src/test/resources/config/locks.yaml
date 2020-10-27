@@ -1,0 +1,4 @@
+infinispan:
+  locks:
+    owners: 2
+    reliability: available
