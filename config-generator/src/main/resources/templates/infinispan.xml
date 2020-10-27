@@ -2,9 +2,11 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="urn:infinispan:config:11.0 https://infinispan.org/schemas/infinispan-config-11.0.xsd
                             urn:infinispan:server:11.0 https://infinispan.org/schemas/infinispan-server-11.0.xsd
+                            urn:infinispan:config:clustered-locks:11.0 https://infinispan.org/schemas/infinispan-clustered-locks-config-11.0.xsd
                             urn:org:jgroups https://www.jgroups.org/schema/jgroups-4.2.xsd"
         xmlns="urn:infinispan:config:11.0"
-        xmlns:server="urn:infinispan:server:11.0">
+        xmlns:server="urn:infinispan:server:11.0"
+        xmlns:locks="urn:infinispan:config:clustered-locks:11.0">
 
     <jgroups>
         <stack name="image-tcp" extends="tcp">
@@ -55,6 +57,8 @@
     <cache-container name="default" statistics="true" zero-capacity-node="{infinispan.zeroCapacityNode}">
         <transport cluster="$\{infinispan.cluster.name:{infinispan.clusterName}\}" node-name="$\{infinispan.node.name:\}"
         {#if xsite.backups}stack="xsite"{#else}stack="image-{jgroups.transport}"{/if}/>
+
+        <locks:clustered-locks num-owners="{infinispan.locks.owners}" reliability="{infinispan.locks.reliability.upperCase}"/>
     </cache-container>
 
     <server xmlns="urn:infinispan:server:11.0">

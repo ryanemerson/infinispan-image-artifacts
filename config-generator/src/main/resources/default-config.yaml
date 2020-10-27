@@ -1,6 +1,9 @@
 infinispan:
   clusterName: infinispan
   zeroCapacityNode: false
+  locks:
+    owners: -1
+    reliability: consistent
 endpoints:
   hotrod:
     auth: true
