@@ -83,7 +83,7 @@ abstract class AbstractMainTest {
    void testRestAuthEnabledByDefault() throws Exception {
       XmlAssert xml = generateDefault().infinispan();
       xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector/s:authentication");
-      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector/s:authentication[@mechanisms='DIGEST']");
+      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector/s:authentication[@mechanisms='DIGEST BASIC']");
    }
 
    @Test
