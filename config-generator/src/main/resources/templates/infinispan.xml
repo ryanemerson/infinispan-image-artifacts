@@ -80,7 +80,7 @@
             {#if endpoints.rest.enabled}
             <rest-connector name="rest">
                 {#if endpoints.rest.auth}
-                <authentication mechanisms="DIGEST"/>
+                <authentication mechanisms="DIGEST BASIC"/>
                 {/if}
                 {#if endpoints.rest.cors}
                 <cors-rules>
