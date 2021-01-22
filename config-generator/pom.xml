@@ -14,7 +14,7 @@
         <version.assertj>3.14.0</version.assertj>
         <version.bytebuddy>1.10.0</version.bytebuddy>
         <version.picoli>4.2.0</version.picoli>
-        <version.quarkus>1.7.4.Final</version.quarkus>
+        <version.quarkus>1.7.6.Final</version.quarkus>
         <version.snakeyaml>1.26</version.snakeyaml>
         <version.xmlunit>2.6.4</version.xmlunit>
     </properties>
