@@ -82,8 +82,8 @@ abstract class AbstractMainTest {
    @Test
    void testRestAuthEnabledByDefault() throws Exception {
       XmlAssert xml = generateDefault().infinispan();
-      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector/s:authentication");
-      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector/s:authentication[@mechanisms='DIGEST']");
+      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector")
+            .haveAttribute("security-realm");
    }
 
    @Test
@@ -96,8 +96,8 @@ abstract class AbstractMainTest {
    @Test
    void testRestAuthDisabled() throws Exception {
       XmlAssert xml = generate("rest-auth-disabled").infinispan();
-      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector");
-      xml.doesNotHaveXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector/s:authentication");
+      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector")
+         .doNotHaveAttribute("security-realm");
    }
 
    @Test
@@ -130,8 +130,8 @@ abstract class AbstractMainTest {
    @Test
    void testHotRodAuthEnabledByDefault() throws Exception {
       XmlAssert xml = generateDefault().infinispan();
-      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector/s:authentication/s:sasl");
-      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector/s:authentication/s:sasl[@server-name='infinispan']");
+      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector")
+         .haveAttribute("security-realm");
    }
 
    @Test
@@ -144,8 +144,8 @@ abstract class AbstractMainTest {
    @Test
    void testHotRodAuthDisabled() throws Exception {
       XmlAssert xml = generate("hotrod-auth-disabled").infinispan();
-      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector");
-      xml.doesNotHaveXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector/s:authentication");
+      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector")
+            .doNotHaveAttribute("security-realm");
    }
 
    @Test
