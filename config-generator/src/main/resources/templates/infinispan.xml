@@ -65,11 +65,11 @@
             </security-realms>
         </security>
 
-        <endpoints socket-binding="default" security-realm="default">
+        <endpoints socket-binding="default">
             {#if endpoints.hotrod.enabled}
             <hotrod-connector name="hotrod">
                 {#if endpoints.hotrod.auth}
-                <authentication>
+                <authentication security-realm="default">
                     <sasl mechanisms="SCRAM-SHA-512 SCRAM-SHA-384 SCRAM-SHA-256 SCRAM-SHA-1 DIGEST-SHA-512 DIGEST-SHA-384 DIGEST-SHA-256 DIGEST-SHA DIGEST-MD5 PLAIN"
                           qop="{endpoints.hotrod.qop}" server-name="{endpoints.hotrod.serverName}"/>
                 </authentication>
@@ -80,7 +80,7 @@
             {#if endpoints.rest.enabled}
             <rest-connector name="rest">
                 {#if endpoints.rest.auth}
-                <authentication mechanisms="DIGEST BASIC"/>
+                <authentication mechanisms="DIGEST BASIC" security-realm="default"/>
                 {/if}
                 {#if endpoints.rest.cors}
                 <cors-rules>
