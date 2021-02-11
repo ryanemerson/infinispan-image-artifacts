@@ -1,0 +1,10 @@
+  cacheContainer:
+    name: default
+    zeroCapacityNode: {infinispan.zeroCapacityNode}
+    clusteredLocks:
+      numOwners: {infinispan.locks.owners}
+      reliability: {infinispan.locks.reliability.upperCase}
+    transport:
+      cluster: $\{infinispan.cluster.name:{infinispan.clusterName}\}
+      nodeName: $\{infinispan.node.name:\}
+      stack: {#if xsite.backups}xsite{#else}image-{jgroups.transport}{/if}

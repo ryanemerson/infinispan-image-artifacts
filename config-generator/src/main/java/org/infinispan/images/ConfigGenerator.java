@@ -30,6 +30,9 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+
 import io.quarkus.qute.RawString;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateExtension;
@@ -38,15 +41,16 @@ import io.quarkus.qute.api.ResourcePath;
 @ApplicationScoped
 public class ConfigGenerator {
 
-   static final String INFINISPAN_FILE = "infinispan.xml";
+   static final String INFINISPAN_FILE = "infinispan.yaml";
    static final String LOGGING_FILE = "log4j2.xml";
-   static final String JGROUPS_RELAY_FILE = "jgroups-relay.xml";
+   static final String JGROUPS_RELAY_FILE = "jgroups-relay.yaml";
+   static final String JGROUPS_RELAY_TEMPLATE = "jgroups/relay.yaml";
 
    @Inject
    Template infinispan;
 
    @Inject
-   @ResourcePath(JGROUPS_RELAY_FILE)
+   @ResourcePath(JGROUPS_RELAY_TEMPLATE)
    Template jgroupsRelay;
 
    @Inject
@@ -209,7 +213,19 @@ public class ConfigGenerator {
    @TemplateExtension
    static RawString listElement(List<String> list, String elementName) {
       String element = list == null || list.isEmpty() ? "" :
-            String.format("<%1$s>%2$s</%1$s>", elementName, String.join(",", list));
+            String.format("%s: \"%s\"", elementName, String.join(",", list));
       return new RawString(element);
+   }
+
+   @TemplateExtension
+   static RawString yaml(Map<String, Object> map) {
+      // TODO cache Yaml instance
+      // {endpoints.yaml}
+      DumperOptions options = new DumperOptions();
+      options.setIndent(2);
+      options.setPrettyFlow(true);
+      // Fix below - additional configuration
+      options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+      return new RawString(new Yaml(options).dump(map));
    }
 }

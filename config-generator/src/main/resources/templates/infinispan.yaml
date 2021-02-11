@@ -1,0 +1,8 @@
+# Current Yaml limitations
+# 1. Xml attributes must come before elements
+# 2. JGroups must come before cacheContainer
+# 3. Repeated type must have singular parent element
+infinispan:
+  {#include jgroups/jgroups /}
+  {#include core/container /}
+  {#include server/server /}

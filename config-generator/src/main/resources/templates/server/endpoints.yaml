@@ -1,0 +1,37 @@
+    endpoints:
+      socketBinding: default
+      securityRealm: default
+      connectors:
+        {#if endpoints.hotrod.enabled}
+          {#if endpoints.auth}
+        hotrodConnector:
+          authentication:
+            sasl:
+              qop: {endpoints.hotrod.qop}
+              serverName: {endpoints.hotrod.serverName}
+          {#else}
+        hotrodConnector: ~
+          {/if}
+        {/if}
+        {#if endpoints.rest.enabled}
+          {#if endpoints.rest.cors}
+        restConnector:
+          corsRules:
+            {#for rule in endpoints.rest.cors}
+            - coresRule:
+                name: rule.name
+                allowCredentials: {rule.allowCredentials or 'false'}
+                maxAgeSeconds: {rule.maxAgeSeconds or 0}
+                {rule.allowedOrigins.listElement('allowedOrigins') or ''}
+                {rule.allowedMethods.listElement('allowedMethods') or ''}
+                {rule.allowedHeaders.listElement('allowedHeaders') or ''}
+                {rule.exposeHeaders.listElement('exposeHeaders') or ''}
+            {/for}
+          {#else}
+        restConnector: ~
+          {/if}
+        {/if}
+        {#if endpoints.memcached.enabled}
+        memcachedConnector:
+          socketBinding: memcached
+        {/if}

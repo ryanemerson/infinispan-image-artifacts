@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.Reader;
 import java.net.InetAddress;
 import java.net.URI;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.xmlunit.assertj.MultipleNodeAssert;
 import org.xmlunit.assertj.XmlAssert;
+import org.yaml.snakeyaml.Yaml;
 
 import picocli.CommandLine;
 
@@ -483,6 +485,10 @@ abstract class AbstractMainTest {
    }
 
    private XmlAssert infinispan() throws Exception {
+      try (InputStream is = Files.newInputStream(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.INFINISPAN_FILE))) {
+         Object c = new Yaml().load(is);
+         assert c == null;
+      }
       String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.INFINISPAN_FILE));
       Map<String, String> prefix2Uri = new HashMap<>();
       prefix2Uri.put("i", "urn:infinispan:config:12.0");

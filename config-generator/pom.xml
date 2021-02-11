@@ -16,6 +16,7 @@
         <version.picoli>4.2.0</version.picoli>
         <version.quarkus>1.11.2.Final</version.quarkus>
         <version.snakeyaml>1.26</version.snakeyaml>
+<!--        TODO remove-->
         <version.xmlunit>2.6.4</version.xmlunit>
     </properties>
     <dependencyManagement>
@@ -66,18 +67,21 @@
             <artifactId>assertj-core</artifactId>
             <version>${version.assertj}</version>
         </dependency>
+        <!--        TODO remove-->
         <dependency>
             <groupId>org.xmlunit</groupId>
             <artifactId>xmlunit-assertj</artifactId>
             <version>${version.xmlunit}</version>
             <scope>test</scope>
         </dependency>
+        <!--        TODO remove-->
         <dependency>
             <groupId>org.xmlunit</groupId>
             <artifactId>xmlunit-core</artifactId>
             <version>${version.xmlunit}</version>
             <scope>test</scope>
         </dependency>
+        <!--        TODO remove-->
         <dependency>
             <groupId>org.xmlunit</groupId>
             <artifactId>xmlunit-matchers</artifactId>

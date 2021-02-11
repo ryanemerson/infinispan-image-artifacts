@@ -1,0 +1,20 @@
+  server:
+    interfaces:
+      - interface:
+          name: public
+          inetAddress:
+            value: $\{infinispan.bind.address:{jgroups.bindAddress}\}
+    socketBindings:
+      defaultInterface: public
+      portOffset: $\{infinispan.socket.binding.port-offset:0\}
+      bindings:
+        - socketBinding:
+            name: default
+            port: 11222
+        {#if endpoints.memcached.enabled}
+        - socketBinding:
+            name: memcached
+            port: 11221
+        {/if}
+    {#include server/security /}
+    {#include server/endpoints /}

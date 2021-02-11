@@ -1,0 +1,36 @@
+config:
+  {#if 'TUNNEL' == xsite.transport.upperCase()}
+  TUNNEL:
+    bindAddr: {jgroups.bindAddress}
+    bindPort: 7900
+    enableDiagnostics: {jgroups.diagnostics}
+    portRange: 0
+    gossipRouterHosts: "{xsite.address}[{xsite.port}],{remoteSites}"
+  PING:
+    returnEntireCache: true
+  {#else}
+  TCP:
+    bindAddr: {jgroups.bindAddress}
+    bindPort: 7900
+    enableDiagnostics: {jgroups.diagnostics}
+    externalAddr: {xsite.address}
+    externalPort: {xsite.port}
+    portRange: 0
+  TCPPING:
+    initialHosts: "{xsite.address}[{xsite.port}],{remoteSites}"
+    portRange: 0
+  {/if}
+  MERGE3: ~
+  FD_SOCK:
+    clientBindPort: 57600
+    startPort: 57600
+  FD_ALL:
+    timeout: 180000
+  VERIFY_SUSPECT: ~
+  pbcast.NAKACK2:
+    useMcastXmit: false
+  UNICAST3: ~
+  pbcast.STABLE: ~
+  pbcast.GMS: ~
+  MFC: ~
+  FRAG3: ~

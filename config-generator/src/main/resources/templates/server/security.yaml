@@ -1,0 +1,27 @@
+    security:
+      credentialStores:
+        - credentialStore:
+            name: credentials
+            path: credentials.pfx
+            clearTextCredential:
+              clearText: secret
+      securityRealms:
+        - securityRealm:
+            name: default
+            propertiesRealm:
+              userProperties:
+                path: users.properties
+                plainText: true
+              groupProperties:
+                path: groups.properties
+          {#if keystore and keystore.path}
+          serverIdentities:
+            ssl:
+              keystore:
+                alias: {keystore:alias}
+                path: {keystore.path}
+                keystorePassword: {keystore.password}
+                {#if keystore.selfSignCert}
+                generateSelfSignedCertificateHost: localhost
+                {/if}/>
+          {/if}
