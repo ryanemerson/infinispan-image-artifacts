@@ -80,13 +80,6 @@ abstract class AbstractMainTest {
    }
 
    @Test
-   void testRestAuthEnabledByDefault() throws Exception {
-      XmlAssert xml = generateDefault().infinispan();
-      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector")
-            .haveAttribute("security-realm");
-   }
-
-   @Test
    void testRestDisabled() throws Exception {
       generate("rest-disabled")
             .infinispan()
@@ -94,10 +87,23 @@ abstract class AbstractMainTest {
    }
 
    @Test
-   void testRestAuthDisabled() throws Exception {
-      XmlAssert xml = generate("rest-auth-disabled").infinispan();
-      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector")
-         .doNotHaveAttribute("security-realm");
+   void testAuthEnabledByDefault() throws Exception {
+      XmlAssert xml = generateDefault().infinispan();
+      xml.hasXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:properties-realm");
+      xml.hasXPath("//i:infinispan/s:server/s:endpoints")
+            .haveAttribute("security-realm");
+      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector/s:authentication/s:sasl")
+            .haveAttribute("qop", "auth")
+            .haveAttribute("server-name", "infinispan");
+   }
+
+   @Test
+   void testAuthDisabled() throws Exception {
+      XmlAssert xml = generate("auth-disabled").infinispan();
+      xml.doesNotHaveXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:properties-realm");
+      xml.doesNotHaveXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector/s:authentication");
+      xml.hasXPath("//i:infinispan/s:server/s:endpoints")
+         .haveAttribute("security-realm");
    }
 
    @Test
@@ -125,27 +131,6 @@ abstract class AbstractMainTest {
       xml.valueByXPath(rule + "/s:allowed-methods").isEqualTo("GET,OPTIONS,POST,PUT,DELETE");
       xml.valueByXPath(rule + "/s:allowed-headers").isEqualTo("X-Custom-Header,Upgrade-Insecure-Requests");
       xml.valueByXPath(rule + "/s:expose-headers").isEqualTo("Key-Content-Type");
-   }
-
-   @Test
-   void testHotRodAuthEnabledByDefault() throws Exception {
-      XmlAssert xml = generateDefault().infinispan();
-      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector")
-         .haveAttribute("security-realm");
-   }
-
-   @Test
-   void testHotRodDisabled() throws Exception {
-      generate("hotrod-disabled")
-            .infinispan()
-            .doesNotHaveXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector");
-   }
-
-   @Test
-   void testHotRodAuthDisabled() throws Exception {
-      XmlAssert xml = generate("hotrod-auth-disabled").infinispan();
-      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector")
-            .doNotHaveAttribute("security-realm");
    }
 
    @Test
