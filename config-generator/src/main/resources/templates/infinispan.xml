@@ -87,19 +87,21 @@
                         </ssl>
                     </server-identities>
                     {/if}
+                    {#if endpoints.auth}
                     <properties-realm groups-attribute="Roles">
                         <user-properties path="users.properties" relative-to="infinispan.server.config.path"
                                          plain-text="true"/>
                         <group-properties path="groups.properties" relative-to="infinispan.server.config.path"/>
                     </properties-realm>
+                    {/if}
                 </security-realm>
             </security-realms>
         </security>
 
-        <endpoints socket-binding="default">
+        <endpoints socket-binding="default" security-realm="default">
             {#if endpoints.hotrod.enabled}
-            {#if endpoints.hotrod.auth}
-            <hotrod-connector security-realm="default">
+            {#if endpoints.auth}
+            <hotrod-connector>
                 <authentication>
                     <sasl qop="{endpoints.hotrod.qop}" server-name="{endpoints.hotrod.serverName}"/>
                 </authentication>
@@ -110,8 +112,8 @@
             {/if}
 
             {#if endpoints.rest.enabled}
-            <rest-connector {#if endpoints.rest.auth}security-realm="default"{/if}>
                 {#if endpoints.rest.cors}
+                <rest-connector>
                 <cors-rules>
                     {#for rule in endpoints.rest.cors}
                     <cors-rule name="{rule.name}" allow-credentials="{rule.allowCredentials or 'false'}"
@@ -123,8 +125,10 @@
                     </cors-rule>
                     {/for}
                 </cors-rules>
+                </rest-connector>
+                {#else}
+                <rest-connector />
                 {/if}
-            </rest-connector>
             {/if}
 
             {#if endpoints.memcached.enabled}

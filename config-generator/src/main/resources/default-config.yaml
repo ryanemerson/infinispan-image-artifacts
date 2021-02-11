@@ -5,15 +5,14 @@ infinispan:
     owners: -1
     reliability: consistent
 endpoints:
+  auth: true
   hotrod:
-    auth: true
     enabled: true
     qop: auth
     serverName: infinispan
   memcached:
     enabled: false
   rest:
-    auth: true
     enabled: true
 jgroups:
   diagnostics: false
