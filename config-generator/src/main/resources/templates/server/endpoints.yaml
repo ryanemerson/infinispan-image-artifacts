@@ -18,8 +18,8 @@
         restConnector:
           corsRules:
             {#for rule in endpoints.rest.cors}
-            - coresRule:
-                name: rule.name
+            - corsRule:
+                name: {rule.name}
                 allowCredentials: {rule.allowCredentials or 'false'}
                 maxAgeSeconds: {rule.maxAgeSeconds or 0}
                 {rule.allowedOrigins.listElement('allowedOrigins') or ''}

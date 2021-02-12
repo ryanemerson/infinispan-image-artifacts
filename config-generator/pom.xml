@@ -13,7 +13,6 @@
         <quarkus.package.type>uber-jar</quarkus.package.type>
         <version.assertj>3.14.0</version.assertj>
         <version.bytebuddy>1.10.0</version.bytebuddy>
-        <version.json>20201115</version.json>
         <version.jsonpath>2.5.0</version.jsonpath>
         <version.picoli>4.2.0</version.picoli>
         <version.quarkus>1.11.2.Final</version.quarkus>
@@ -67,11 +66,6 @@
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
             <version>${version.jsonpath}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>${version.json}</version>
         </dependency>
         <!-- Explicitly define assertj version to fix XMlUnit issue https://github.com/xmlunit/xmlunit/issues/181-->
         <dependency>

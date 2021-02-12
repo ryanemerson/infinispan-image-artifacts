@@ -8,7 +8,6 @@
             port_range: 0
             stack.combine: INSERT_AFTER
             stack.position: VERIFY_SUSPECT
-    />
     {/if}
           ASYM_ENCRYPT:
             use_external_key_exchange: {keystore.path ? 'true' : 'false'}

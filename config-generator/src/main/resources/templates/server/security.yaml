@@ -8,20 +8,22 @@
       securityRealms:
         - securityRealm:
             name: default
+            {#if endpoints.auth}
             propertiesRealm:
               userProperties:
                 path: users.properties
                 plainText: true
               groupProperties:
                 path: groups.properties
-          {#if keystore and keystore.path}
-          serverIdentities:
-            ssl:
-              keystore:
-                alias: {keystore:alias}
-                path: {keystore.path}
-                keystorePassword: {keystore.password}
-                {#if keystore.selfSignCert}
-                generateSelfSignedCertificateHost: localhost
-                {/if}/>
-          {/if}
+            {/if}
+            {#if keystore and keystore.path}
+            serverIdentities:
+              ssl:
+                keystore:
+                  alias: {keystore.alias}
+                  path: {keystore.path}
+                  keystorePassword: {keystore.password}
+                  {#if keystore.selfSignCert}
+                  generateSelfSignedCertificateHost: localhost
+            {/if}
+            {/if}

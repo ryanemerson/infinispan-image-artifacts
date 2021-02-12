@@ -2,31 +2,37 @@ package org.infinispan.images;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.xmlunit.assertj.XmlAssert.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.net.InetAddress;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.xmlunit.assertj.MultipleNodeAssert;
 import org.xmlunit.assertj.XmlAssert;
 import org.yaml.snakeyaml.Yaml;
 
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import picocli.CommandLine;
 
 abstract class AbstractMainTest {
@@ -68,408 +74,407 @@ abstract class AbstractMainTest {
    @Test
    void testChangeInfinispanClusterName() throws Exception {
       String json = generate("cluster-name").infinispan();
-      String clusterName = JsonPath.read(json, "$.infinispan.cacheContainer.transport.cluster");
-      assertEquals("customClusterName", clusterName);
+      assertValue(json, "infinispan.cacheContainer.transport.cluster", "${infinispan.cluster.name:customClusterName}");
    }
 
    @Test()
    void testMemcachedDisabledByDefault() throws Exception {
       String json = generateDefault().infinispan();
       assertThrows(PathNotFoundException.class, () ->
-            JsonPath.read(json, "$.infinispan.server.endpoints.connectors.memcachedConnector"));
+            JsonPath.read(json, "infinispan.server.endpoints.connectors.memcachedConnector"));
    }
 
    @Test
    void testEnableMemcached() throws Exception {
       String json = generate("memcached-enabled").infinispan();
-      Map<String, String> memcached = JsonPath.read(json, "$.infinispan.server.endpoints.connectors.memcachedConnector");
-      assertNotNull(memcached);
-      assertEquals("memcached", memcached.get("socketBinding"));
+      assertValue(json, "infinispan.server.endpoints.connectors.memcachedConnector.socketBinding", "memcached");
    }
-//
-//   @Test
-//   void testRestAuthEnabledByDefault() throws Exception {
-//      XmlAssert xml = generateDefault().infinispan();
-//      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector")
-//            .haveAttribute("security-realm");
-//   }
-//
-//   @Test
-//   void testRestDisabled() throws Exception {
-//      generate("rest-disabled")
-//            .infinispan()
-//            .doesNotHaveXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector");
-//   }
-//
-//   @Test
-//   void testRestAuthDisabled() throws Exception {
-//      XmlAssert xml = generate("rest-auth-disabled").infinispan();
-//      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector")
-//         .doNotHaveAttribute("security-realm");
-//   }
-//
-//   @Test
-//   void testRestCorsRules() throws Exception {
-//      XmlAssert xml = generate("rest-cors-rules").infinispan();
-//      String rulesPath = "//i:infinispan/s:server/s:endpoints/s:rest-connector/s:cors-rules/";
-//      String rule = rulesPath + "s:cors-rule[1]";
-//      xml.hasXPath(rule)
-//            .haveAttribute("name", "restrict-host1")
-//            .haveAttribute("allow-credentials", "false")
-//            .haveAttribute("max-age-seconds", "0");
-//
-//      xml.valueByXPath(rule + "/s:allowed-origins").isEqualTo("http://host1,https://host1");
-//      xml.valueByXPath(rule + "/s:allowed-methods").isEqualTo("GET");
-//      xml.doesNotHaveXPath(rule + "/s:allowed-headers");
-//      xml.doesNotHaveXPath(rule + "/s:expose-headers");
-//
-//      rule = rulesPath + "s:cors-rule[2]";
-//      xml.hasXPath(rule)
-//            .haveAttribute("name", "allow-all")
-//            .haveAttribute("allow-credentials", "true")
-//            .haveAttribute("max-age-seconds", "1");
-//
-//      xml.valueByXPath(rule + "/s:allowed-origins").isEqualTo("*");
-//      xml.valueByXPath(rule + "/s:allowed-methods").isEqualTo("GET,OPTIONS,POST,PUT,DELETE");
-//      xml.valueByXPath(rule + "/s:allowed-headers").isEqualTo("X-Custom-Header,Upgrade-Insecure-Requests");
-//      xml.valueByXPath(rule + "/s:expose-headers").isEqualTo("Key-Content-Type");
-//   }
-//
-//   @Test
-//   void testHotRodAuthEnabledByDefault() throws Exception {
-//      XmlAssert xml = generateDefault().infinispan();
-//      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector")
-//         .haveAttribute("security-realm");
-//   }
-//
-//   @Test
-//   void testHotRodDisabled() throws Exception {
-//      generate("hotrod-disabled")
-//            .infinispan()
-//            .doesNotHaveXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector");
-//   }
-//
-//   @Test
-//   void testHotRodAuthDisabled() throws Exception {
-//      XmlAssert xml = generate("hotrod-auth-disabled").infinispan();
-//      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector")
-//            .doNotHaveAttribute("security-realm");
-//   }
-//
-//   @Test
-//   void testCustomLogging() throws Exception {
-//      XmlAssert xml = generate("logging").logging();
-//      xml.hasXPath("//Configuration/Appenders/Console/PatternLayout")
-//            .haveAttribute("pattern", "%K{level}%d{HH\\:mm\\:ss,SSS} %-5p [%c] (%t) %s%e%n");
-//
-//      xml.hasXPath("//Configuration/Appenders/RollingFile")
-//            .haveAttribute("fileName", "server/custom/log")
-//            .haveAttribute("filePattern", "server/custom/log.%d{yyyy-MM-dd}-%i");
-//
-//      xml.hasXPath("//Configuration/Appenders/RollingFile/PatternLayout")
-//            .haveAttribute("pattern", "%d{yyyy-MM-dd HH\\:mm\\:ss,SSS} %-5p [%c] (%t) %s%e%n");
-//
-//      xml.hasXPath("//Configuration/Loggers/Root/AppenderRef[1]")
-//            .haveAttribute("ref", "STDOUT")
-//            .haveAttribute("level", "INFO");
-//
-//      xml.hasXPath("//Configuration/Loggers/Root/AppenderRef[2]")
-//            .haveAttribute("ref", "FILE")
-//            .haveAttribute("level", "INFO");
-//
-//      assertLogger(xml, 1, "com.arjuna", "WARN");
-//      assertLogger(xml, 2, "org.infinispan", "DEBUG");
-//      assertLogger(xml, 3, "org.jgroups", "WARN");
-//      assertLogger(xml, 4, "org.infinispan.commands", "TRACE");
-//   }
-//
-//   void assertLogger(XmlAssert xml, int index, String category, String level) {
-//      String xpath = String.format("//Configuration/Loggers/Logger[%d]", index);
-//      xml.hasXPath(xpath)
-//            .haveAttribute("name", category)
-//            .haveAttribute("level", level);
-//   }
-//
-//   @Test
-//   void testJGroupsUdp() throws Exception {
-//      XmlAssert xml = generate("jgroups-udp").infinispan();
-//      assertStack(xml, "image-udp", "i:UDP")
-//            .haveAttribute("enable_diagnostics", Boolean.toString(false));
-//   }
-//
-//   @Test
-//   void testJGroupsDiagnosticsUdp() throws Exception {
-//      XmlAssert xml = generate("jgroups-diagnostics-udp").infinispan();
-//      assertStack(xml, "image-udp", "i:UDP")
-//            .haveAttribute("enable_diagnostics", Boolean.toString(true));
-//   }
-//
-//   @Test
-//   void testJGroupsTcp() throws Exception {
-//      testJGroupsTcp(false);
-//   }
-//
-//   @Test
-//   void testJGroupsDiagnosticsTcp() throws Exception {
-//      testJGroupsTcp(true);
-//   }
-//
-//   private void testJGroupsTcp(boolean diagnosticsEnabled) throws Exception {
-//      XmlAssert xml = generate("jgroups-diagnostics-tcp").infinispan();
-//      String bindProperty = String.format("${jgroups.bind.address,jgroups.tcp.address:%s}", InetAddress.getLocalHost().getHostAddress());
-//      assertStack(xml, "i:TCP")
-//            .haveAttribute("enable_diagnostics", Boolean.toString(true))
-//            .haveAttribute("bind_addr", bindProperty);
-//      assertStack(xml, "i:MPING");
-//   }
-//
-//   @Test
-//   void testJGroupsEncryptionDefault() throws Exception {
-//      XmlAssert xml = generateDefault().infinispan();
-//      xml.doesNotHaveXPath("//j:config/j:ASYM_ENCRYPT");
-//      xml.doesNotHaveXPath("//j:config/j:SERIALIZE");
-//   }
-//
-//   @Test
-//   void testJGroupsEncryptionEnabled() throws Exception {
-//      XmlAssert xml = generate("jgroups-encryption").infinispan();
-//      assertStack(xml, "i:ASYM_ENCRYPT")
-//            .haveAttribute("use_external_key_exchange", "false");
-//
-//      assertStack(xml, "i:SERIALIZE");
-//   }
-//
-//   @Test
-//   void testJGroupsEncryptionWithKeystore() throws Exception {
-//      // Generate Yaml config so we can set the absolute path of caFile and crtPath
-//      URI caUri = new File("src/test/resources", "service-ca.crt").toURI();
-//      String yaml =
-//            "jgroups:\n" +
-//                  "  encrypt: true\n" +
-//                  "keystore:\n" +
-//                  "  caFile: '" + caUri.getPath() + "'\n" +
-//                  "  crtPath: " + caUri.resolve(".").getPath();
-//
-//      writeYamlAndGenerate(yaml, "jgroups-encryption-keystore");
-//      XmlAssert xml = infinispan();
-//
-//      assertStack(xml, "i:SSL_KEY_EXCHANGE")
-//            .haveAttribute("keystore_name", new File(outputDir, "keystores/keystore.p12").getAbsolutePath())
-//            .haveAttribute("keystore_password", "infinispan")
-//            .haveAttribute("keystore_type", "pkcs12");
-//
-//      assertStack(xml, "i:ASYM_ENCRYPT")
-//            .haveAttribute("use_external_key_exchange", "true");
-//
-//      assertStack(xml, "i:SERIALIZE");
-//   }
-//
-//   @Test
-//   void testJGroupsXSite() throws Exception {
-//      generate("jgroups-xsite");
-//
-//      XmlAssert infinispan = infinispan();
-//
-//      assertStack(infinispan, null);
-//
-//      assertStackFile(infinispan, "relay-global")
-//            .haveAttribute("path", "jgroups-relay.xml");
-//
-//      infinispan.hasXPath("//i:infinispan/i:cache-container/i:transport")
-//            .haveAttribute("stack", "xsite");
-//
-//      assertStack(infinispan, "xsite", null)
-//            .haveAttribute("extends", "image-tcp");
-//
+
+   @Test
+   void testRestDisabled() throws Exception {
+      String json = generate("rest-disabled").infinispan();
+      assertThrows(PathNotFoundException.class, () ->
+            JsonPath.read(json, "infinispan.server.endpoints.connectors.restConnector"));
+   }
+
+   @Test
+   void testAuthEnabledByDefault() throws Exception {
+      String json = generateDefault().infinispan();
+      JSONArray propertiesRealm = JsonPath.read(json,"infinispan.server.security.securityRealms[0].securityRealm[?(@.name == 'default')].propertiesRealm");
+      assertEquals(1, propertiesRealm.size());
+
+      Map<String, String> sasl = JsonPath.read(json, "infinispan.server.endpoints.connectors.hotrodConnector.authentication.sasl");
+      assertNotNull(sasl);
+      assertEquals("auth", sasl.get("qop"));
+      assertEquals("infinispan", sasl.get("serverName"));
+   }
+
+   @Test
+   void testAuthDisabled() throws Exception {
+      String json = generate("auth-disabled").infinispan();
+      assertEmptyJsonList(json, ".infinispan.server.security.securityRealms[0].securityRealm[?(@.name == 'default')].propertiesRealm.userProperties");
+      assertThrows(PathNotFoundException.class, () ->
+            JsonPath.read(json, "infinispan.server.endpoints.connectors.hotrodConnector.authentication"));
+   }
+
+   @Test
+   void testHotRodDisabled() throws Exception {
+      String json = generate("hotrod-disabled").infinispan();
+      assertThrows(PathNotFoundException.class, () ->
+            JsonPath.read(json, "infinispan.server.endpoints.connectors.hotrodConnector"));
+   }
+
+   @Test
+   @SuppressWarnings("unchecked")
+   void testRestCorsRules() throws Exception {
+      String json = generate("rest-cors-rules").infinispan();
+      JSONArray corsRules = JsonPath.read(json, "infinispan.server.endpoints.connectors.restConnector.corsRules[*].corsRule");
+      Map<String, ?> rule = (Map<String, ?>) corsRules.get(0);
+      assertEquals("restrict-host1", rule.get("name"));
+      assertEquals(false, rule.get("allowCredentials"));
+      assertEquals(0, rule.get("maxAgeSeconds"));
+
+      assertEquals("http://host1,https://host1", rule.get("allowedOrigins"));
+      assertEquals("GET", rule.get("allowedMethods"));
+      assertNull(rule.get("allowedHeaders"));
+      assertNull(rule.get("exposeHeaders"));
+
+      rule = (Map<String, ?>) corsRules.get(1);
+      assertEquals("allow-all", rule.get("name"));
+      assertEquals(true, rule.get("allowCredentials"));
+      assertEquals(1, rule.get("maxAgeSeconds"));
+
+      assertEquals("*", rule.get("allowedOrigins"));
+      assertEquals("GET,OPTIONS,POST,PUT,DELETE", rule.get("allowedMethods"));
+      assertEquals("X-Custom-Header,Upgrade-Insecure-Requests", rule.get("allowedHeaders"));
+      assertEquals("Key-Content-Type", rule.get("exposeHeaders"));
+   }
+
+   @Test
+   void testCustomLogging() throws Exception {
+      generate("logging");
+      XmlAssert xml = assertThat(Files.readString(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.LOGGING_FILE)));
+      xml.hasXPath("//Configuration/Appenders/Console/PatternLayout")
+            .haveAttribute("pattern", "%K{level}%d{HH\\:mm\\:ss,SSS} %-5p [%c] (%t) %s%e%n");
+
+      xml.hasXPath("//Configuration/Appenders/RollingFile")
+            .haveAttribute("fileName", "server/custom/log")
+            .haveAttribute("filePattern", "server/custom/log.%d{yyyy-MM-dd}-%i");
+
+      xml.hasXPath("//Configuration/Appenders/RollingFile/PatternLayout")
+            .haveAttribute("pattern", "%d{yyyy-MM-dd HH\\:mm\\:ss,SSS} %-5p [%c] (%t) %s%e%n");
+
+      xml.hasXPath("//Configuration/Loggers/Root/AppenderRef[1]")
+            .haveAttribute("ref", "STDOUT")
+            .haveAttribute("level", "INFO");
+
+      xml.hasXPath("//Configuration/Loggers/Root/AppenderRef[2]")
+            .haveAttribute("ref", "FILE")
+            .haveAttribute("level", "INFO");
+
+      assertLogger(xml, 1, "com.arjuna", "WARN");
+      assertLogger(xml, 2, "org.infinispan", "DEBUG");
+      assertLogger(xml, 3, "org.jgroups", "WARN");
+      assertLogger(xml, 4, "org.infinispan.commands", "TRACE");
+   }
+
+   void assertLogger(XmlAssert xml, int index, String category, String level) {
+      String xpath = String.format("//Configuration/Loggers/Logger[%d]", index);
+      xml.hasXPath(xpath)
+            .haveAttribute("name", category)
+            .haveAttribute("level", level);
+   }
+
+   @Test
+   void testJGroupsUdp() throws Exception {
+      String json = generate("jgroups-udp").infinispan();
+      assertStack(json, "image-udp", "UDP", Collections.singletonMap("enable_diagnostics", false));
+   }
+   @Test
+   void testJGroupsDiagnosticsUdp() throws Exception {
+      String json = generate("jgroups-diagnostics-udp").infinispan();
+      assertStack(json, "image-udp", "UDP", Collections.singletonMap("enable_diagnostics", true));
+   }
+
+   @Test
+   void testJGroupsTcp() throws Exception {
+      testJGroupsTcp(false);
+   }
+
+   @Test
+   void testJGroupsDiagnosticsTcp() throws Exception {
+      testJGroupsTcp(true);
+   }
+
+   private void testJGroupsTcp(boolean diagnosticsEnabled) throws Exception {
+      String json = (diagnosticsEnabled ? generate("jgroups-diagnostics-tcp") : generateDefault()).infinispan();
+
+      String bindProperty = String.format("${jgroups.bind.address,jgroups.tcp.address:%s}", InetAddress.getLocalHost().getHostAddress());
+      Map<String, Object> tcpAtrributes = new HashMap<>();
+      tcpAtrributes.put("enable_diagnostics", diagnosticsEnabled);
+      tcpAtrributes.put("bind_addr", bindProperty);
+
+      String stack = "image-tcp";
+      assertStack(json, stack, "TCP", tcpAtrributes);
+      assertStack(json, stack, "MPING");
+   }
+
+   @Test
+   void testJGroupsEncryptionDefault() throws Exception {
+      String json = generateDefault().infinispan();
+      String allStacks = "infinispan.jgroups.stacks[*].stack.";
+      assertEmptyJsonList(json, allStacks + ".ASYM_ENCRYPT");
+      assertEmptyJsonList(json, allStacks + ".SERIALIZE");
+   }
+
+   @Test
+   void testJGroupsEncryptionEnabled() throws Exception {
+      String json = generate("jgroups-encryption").infinispan();
+      assertStack(json, "image-tcp", "ASYM_ENCRYPT", Collections.singletonMap("use_external_key_exchange", false));
+      assertStack(json, "image-tcp", "SERIALIZE");
+   }
+
+   @Test
+   void testJGroupsEncryptionWithKeystore() throws Exception {
+      // Generate Yaml config so we can set the absolute path of caFile and crtPath
+      URI caUri = new File("src/test/resources", "service-ca.crt").toURI();
+      String yaml =
+            "jgroups:\n" +
+                  "  encrypt: true\n" +
+                  "keystore:\n" +
+                  "  caFile: '" + caUri.getPath() + "'\n" +
+                  "  crtPath: " + caUri.resolve(".").getPath();
+      writeYamlAndGenerate(yaml, "jgroups-encryption-keystore");
+
+      Map<String, Object> keyExchangeProps = new HashMap<>();
+      keyExchangeProps.put("keystore_name", new File(outputDir, "keystores/keystore.p12").getAbsolutePath());
+      keyExchangeProps.put("keystore_password", "infinispan");
+      keyExchangeProps.put("keystore_type", "pkcs12");
+
+      String json = infinispan();
+      assertStack(json, "image-tcp", "SSL_KEY_EXCHANGE", keyExchangeProps);
+      assertStack(json, "image-tcp", "ASYM_ENCRYPT", Collections.singletonMap("use_external_key_exchange", true));
+      assertStack(json, "image-tcp", "SERIALIZE");
+   }
+
+   @Test
+   void testJGroupsXSite() throws Exception {
+      String json = generate("jgroups-xsite").infinispan();
+
+      assertStackFile(json, "relay-global", "jgroups-relay.xml");
+      assertValue(json, "infinispan.cacheContainer.transport.stack", "xsite");
+
+      Map<String, ?> xsite = getStack(json, "xsite");
+      assertEquals("image-tcp", xsite.get("extends"));
+      Map<String, ?> relay2 = (Map<String, ?>) xsite.get("relay.RELAY2");
+      assertEquals(8, relay2.get("max_site_masters"));
+      assertEquals(false, relay2.get("can_become_site_master"));
+      assertEquals("LON", relay2.get("site"));
+
+      Map<String, ?> sites = (Map<String, ?>) xsite.get("remoteSites");
+      assertEquals("relay-global", sites.get("defaultStack"));
+
+      // TODO add test for remoteSite names when yaml parsing is fixed https://github.com/infinispan/infinispan/pull/8987#discussion_r574477119
 //      assertStack(infinispan, "xsite", "/i:remote-sites/i:remote-site[1]")
 //            .haveAttribute("name", "LON");
 //
 //      assertStack(infinispan, "xsite", "/i:remote-sites/i:remote-site[2]")
 //            .haveAttribute("name", "NYC");
 //
-//      assertStack(infinispan, "xsite", "/j:relay.RELAY2")
-//            .haveAttribute("max_site_masters", "8")
-//            .haveAttribute("can_become_site_master", "false")
-//            .haveAttribute("site", "LON");
-//
-//      XmlAssert relay = jgroupsRelay();
-//      relay.hasXPath("//j:config/j:TCP")
-//            .haveAttribute("external_addr", "lon-addr")
-//            .haveAttribute("external_port", "7200");
-//
-//      relay.hasXPath("//j:config/j:TCPPING")
-//            .haveAttribute("initial_hosts", "lon-addr[7200],nyc-addr[7200]");
-//   }
-//
-//   @Test
-//   void testKeyStoreFromCrt() throws Exception {
-//      // Generate Yaml config so we can set the absolute path of caFile and crtPath
-//      URI caUri = new File("src/test/resources", "service-ca.crt").toURI();
-//      String yaml =
-//            "keystore:\n" +
-//                  "  alias: customAlias\n" +
-//                  "  password: customPassword\n" +
-//                  "  caFile: '" + caUri.getPath() + "'\n" +
-//                  "  crtPath: " + caUri.resolve(".").getPath();
-//      testKeyStoreFromCrt(yaml, outputDir.getAbsolutePath() + "/keystores/keystore.p12");
-//   }
-//
-//   @Test
-//   void testKeyStoreFromCrtCustomPath() throws Exception {
-//      // Generate Yaml config so we can set the absolute path of caFile and crtPath
-//      URI caUri = new File("src/test/resources", "service-ca.crt").toURI();
-//
-//      // Test file with extension
-//      String yaml =
-//            "keystore:\n" +
-//                  "  alias: customAlias\n" +
-//                  "  password: customPassword\n" +
-//                  "  path: " + outputDir.getAbsolutePath() + "/custom-dir/custom-keystore-name.p12\n" +
-//                  "  caFile: '" + caUri.getPath() + "'\n" +
-//                  "  crtPath: " + caUri.resolve(".").getPath();
-//      testKeyStoreFromCrt(yaml, outputDir.getAbsolutePath() + "/custom-dir/custom-keystore-name.p12");
-//
-//      // Test file without extension
-//      yaml =
-//            "keystore:\n" +
-//                  "  alias: customAlias\n" +
-//                  "  password: customPassword\n" +
-//                  "  path: " + outputDir.getAbsolutePath() + "/keystore\n" +
-//                  "  caFile: '" + caUri.getPath() + "'\n" +
-//                  "  crtPath: " + caUri.resolve(".").getPath();
-//      testKeyStoreFromCrt(yaml, outputDir.getAbsolutePath() + "/keystore");
-//   }
-//
-//   private void testKeyStoreFromCrt(String yaml, String keystorePath) throws Exception {
-//      writeYamlAndGenerate(yaml, "keystore-crt-path");
-//      XmlAssert xml = infinispan();
-//
-//      String path = "//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:server-identities/s:ssl/s:keystore";
-//      xml.hasXPath(path)
-//            .haveAttribute("alias", "customAlias")
-//            .haveAttribute("keystore-password", "customPassword")
-//            .haveAttribute("path", keystorePath)
-//            .doNotHaveAttribute("generate-self-signed-certificate-host");
-//   }
-//
-//   @Test
-//   void testKeyStoreProvided() throws Exception {
-//      // Generate Yaml config so we can set the absolute path of the provided keystore
-//      URI caUri = new File("src/test/resources", "my-keystore.jks").toURI();
-//      String yaml =
-//            "keystore:\n" +
-//                  "  type: jks\n" +
-//                  "  password: password\n" +
-//                  "  path: " + caUri.getPath();
-//
-//      writeYamlAndGenerate(yaml, "keystore-provided");
-//      XmlAssert xml = infinispan();
-//
-//      String path = "//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:server-identities/s:ssl/s:keystore";
-//      xml.hasXPath(path)
-//            .haveAttribute("alias", "server")
-//            .haveAttribute("keystore-password", "password")
-//            .haveAttribute("path", caUri.getPath())
-//            .doNotHaveAttribute("generate-self-signed-certificate-host");
-//   }
-//
-//   @Test
-//   void testKeystoreSelfSigned() throws Exception {
-//      generate("keystore-self-signed");
-//      XmlAssert xml = infinispan();
-//
-//      String path = "//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:server-identities/s:ssl/s:keystore";
-//      xml.hasXPath(path)
-//            .haveAttribute("alias", "server")
-//            .haveAttribute("keystore-password", "infinispan")
-//            .haveAttribute("generate-self-signed-certificate-host", "localhost");
-//   }
-//
-//   @Test
-//   void testJGroupsXSiteWithTunnel() throws Exception {
-//      generate("jgroups-xsite-tunnel");
-//
-//      XmlAssert infinispan = infinispan();
-//
-//      assertStack(infinispan, null);
-//
-//      assertStackFile(infinispan, "relay-global")
-//            .haveAttribute("name", "relay-global")
-//            .haveAttribute("path", "jgroups-relay.xml");
-//
-//      infinispan.hasXPath("//i:infinispan/i:cache-container/i:transport")
-//            .haveAttribute("stack", "xsite");
-//
-//      assertStack(infinispan, "xsite", null)
-//            .haveAttribute("extends", "image-tcp");
-//
+      String relay = jgroupsRelay();
+      Map<String, Object> tcp = JsonPath.read(relay, "config.TCP");
+      assertEquals("lon-addr", tcp.get("externalAddr"));
+      assertEquals(7200, tcp.get("externalPort"));
+
+      assertValue(relay, "config.TCPPING.initialHosts", "lon-addr[7200],nyc-addr[7200]");
+   }
+
+   @Test
+   void testKeyStoreFromCrt() throws Exception {
+      // Generate Yaml config so we can set the absolute path of caFile and crtPath
+      URI caUri = new File("src/test/resources", "service-ca.crt").toURI();
+      String yaml =
+            "keystore:\n" +
+                  "  alias: customAlias\n" +
+                  "  password: customPassword\n" +
+                  "  caFile: '" + caUri.getPath() + "'\n" +
+                  "  crtPath: " + caUri.resolve(".").getPath();
+      testKeyStoreFromCrt(yaml, outputDir.getAbsolutePath() + "/keystores/keystore.p12");
+   }
+
+   @Test
+   void testKeyStoreFromCrtCustomPath() throws Exception {
+      // Generate Yaml config so we can set the absolute path of caFile and crtPath
+      URI caUri = new File("src/test/resources", "service-ca.crt").toURI();
+
+      // Test file with extension
+      String yaml =
+            "keystore:\n" +
+                  "  alias: customAlias\n" +
+                  "  password: customPassword\n" +
+                  "  path: " + outputDir.getAbsolutePath() + "/custom-dir/custom-keystore-name.p12\n" +
+                  "  caFile: '" + caUri.getPath() + "'\n" +
+                  "  crtPath: " + caUri.resolve(".").getPath();
+      testKeyStoreFromCrt(yaml, outputDir.getAbsolutePath() + "/custom-dir/custom-keystore-name.p12");
+
+      // Test file without extension
+      yaml =
+            "keystore:\n" +
+                  "  alias: customAlias\n" +
+                  "  password: customPassword\n" +
+                  "  path: " + outputDir.getAbsolutePath() + "/keystore\n" +
+                  "  caFile: '" + caUri.getPath() + "'\n" +
+                  "  crtPath: " + caUri.resolve(".").getPath();
+      testKeyStoreFromCrt(yaml, outputDir.getAbsolutePath() + "/keystore");
+   }
+
+   private void testKeyStoreFromCrt(String yaml, String keystorePath) throws Exception {
+      String json = writeYamlAndGenerate(yaml, "keystore-crt-path").infinispan();
+      Map<String, ?> keystore = getKeystore(json);
+      assertEquals("customAlias", keystore.get("alias"));
+      assertEquals("customPassword", keystore.get("keystorePassword"));
+      assertEquals(keystorePath, keystore.get("path"));
+      assertNull(keystore.get("generateSelfSignedCertificateHost"));
+   }
+
+   private Map<String, ?> getKeystore(String json) {
+      return getSingleton(json, "infinispan.server.security.securityRealms[*].securityRealm[?(@.name == 'default')].serverIdentities.ssl.keystore");
+   }
+
+   @Test
+   void testKeyStoreProvided() throws Exception {
+      // Generate Yaml config so we can set the absolute path of the provided keystore
+      URI caUri = new File("src/test/resources", "my-keystore.jks").toURI();
+      String yaml =
+            "keystore:\n" +
+                  "  type: jks\n" +
+                  "  password: password\n" +
+                  "  path: " + caUri.getPath();
+
+      String json = writeYamlAndGenerate(yaml, "keystore-provided").infinispan();
+      Map<String, ?> keystore = getKeystore(json);
+      assertEquals("server", keystore.get("alias"));
+      assertEquals("password", keystore.get("keystorePassword"));
+      assertEquals(caUri.getPath(), keystore.get("path"));
+      assertNull(keystore.get("generateSelfSignedCertificateHost"));
+   }
+
+   @Test
+   void testKeystoreSelfSigned() throws Exception {
+      String json = generate("keystore-self-signed").infinispan();
+      Map<String, ?> keystore = getKeystore(json);
+      assertEquals("server", keystore.get("alias"));
+      assertEquals("infinispan", keystore.get("keystorePassword"));
+      assertEquals("localhost", keystore.get("generateSelfSignedCertificateHost"));
+   }
+
+   @Test
+   void testJGroupsXSiteWithTunnel() throws Exception {
+      String json = generate("jgroups-xsite-tunnel").infinispan();
+
+      assertStackFile(json, "relay-global", "jgroups-relay.xml");
+      assertValue(json, "infinispan.cacheContainer.transport.stack", "xsite");
+
+      Map<String, ?> xsite = getStack(json, "xsite");
+      assertEquals("image-tcp", xsite.get("extends"));
+      Map<String, ?> relay2 = (Map<String, ?>) xsite.get("relay.RELAY2");
+      assertEquals(false, relay2.get("can_become_site_master"));
+      assertEquals("LON", relay2.get("site"));
+
+      // TODO add test for remoteSite names when yaml parsing is fixed https://github.com/infinispan/infinispan/pull/8987#discussion_r574477119
 //      assertStack(infinispan, "xsite", "/i:remote-sites/i:remote-site[1]")
 //            .haveAttribute("name", "LON");
 //
 //      assertStack(infinispan, "xsite", "/i:remote-sites/i:remote-site[2]")
 //            .haveAttribute("name", "NYC");
-//
-//      XmlAssert relay = jgroupsRelay();
-//      relay.hasXPath("//j:config/j:TUNNEL")
-//            .haveAttribute("gossip_router_hosts", "lon-addr[7200],nyc-addr[7200]");
-//   }
-//
-//   @Test
-//   void testCredentialIdentities() throws Exception {
-//      String path = new File("src/test/resources/identities", "identities.yaml").getAbsolutePath();
-//      assertEquals(CommandLine.ExitCode.OK, execute(String.format("--identities=%s", path), outputDir.getAbsolutePath()));
-//
-//      Properties userProps = loadPropertiesFile("users.properties");
-//      assertEquals(2, userProps.size());
-//      assertEquals("pass", userProps.get("user1"));
-//      assertEquals("pass", userProps.get("user2"));
-//
-//      Properties groupProps = loadPropertiesFile("groups.properties");
-//      assertEquals(2, groupProps.size());
-//      assertEquals("admin,rockstar", groupProps.get("user1"));
-//      assertEquals("non-admin", groupProps.get("user2"));
-//   }
-//
-//   @Test
-//   void testZeroCapacityNode() throws Exception {
-//      generate("zero-capacity")
-//            .infinispan()
-//            .hasXPath("//i:infinispan/i:cache-container[@zero-capacity-node='true']");
-//
-//      generateDefault()
-//            .infinispan()
-//            .hasXPath("//i:infinispan/i:cache-container[@zero-capacity-node='false']");
-//   }
-//
-//   @Test
-//   void testClusteredLocks() throws Exception {
-//      generateDefault()
-//            .infinispan()
-//            .hasXPath("//i:infinispan/i:cache-container/cl:clustered-locks")
-//            .haveAttribute("num-owners", "-1")
-//            .haveAttribute("reliability", "CONSISTENT");
-//
-//      generate("locks")
-//            .infinispan()
-//            .hasXPath("//i:infinispan/i:cache-container/cl:clustered-locks")
-//            .haveAttribute("num-owners", "2")
-//            .haveAttribute("reliability", "AVAILABLE");
-//   }
 
-   MultipleNodeAssert assertStack(XmlAssert xml, String path) {
-      return assertStack(xml, "image-tcp", path);
+      assertValue(jgroupsRelay(), "config.TUNNEL.gossipRouterHosts", "lon-addr[7200],nyc-addr[7200]");
    }
 
-   MultipleNodeAssert assertStack(XmlAssert xml, String name, String path) {
-      String stack = String.format("(//i:infinispan/i:jgroups/i:stack[@name='%s'])[1]", name);
-      if (path != null)
-         stack = String.format("%s/%s", stack, path);
-      return xml.hasXPath(stack);
+   @Test
+   void testCredentialIdentities() throws Exception {
+      String path = new File("src/test/resources/identities", "identities.yaml").getAbsolutePath();
+      assertEquals(CommandLine.ExitCode.OK, execute(String.format("--identities=%s", path), outputDir.getAbsolutePath()));
+
+      Properties userProps = loadPropertiesFile("users.properties");
+      assertEquals(2, userProps.size());
+      assertEquals("pass", userProps.get("user1"));
+      assertEquals("pass", userProps.get("user2"));
+
+      Properties groupProps = loadPropertiesFile("groups.properties");
+      assertEquals(2, groupProps.size());
+      assertEquals("admin,rockstar", groupProps.get("user1"));
+      assertEquals("non-admin", groupProps.get("user2"));
    }
 
-   MultipleNodeAssert assertStackFile(XmlAssert xmlAssert, String file) {
-      String path = String.format("(//i:infinispan/i:jgroups/i:stack-file[@name='%s'])[1]", file);
-      return xmlAssert.hasXPath(path);
+   @Test
+   void testZeroCapacityNode() throws Exception {
+      String json = generate("zero-capacity").infinispan();
+      String jsonPath = "infinispan.cacheContainer.zeroCapacityNode";
+      assertValue(json, jsonPath, true);
+
+      json = generateDefault().infinispan();
+      assertValue(json, jsonPath, false);
+   }
+
+   @Test
+   void testClusteredLocks() throws Exception {
+      String json = generateDefault().infinispan();
+      String jsonPath = "infinispan.cacheContainer.clusteredLocks";
+      Map<String, ?> locks = JsonPath.read(json, jsonPath);
+      assertEquals(-1, locks.get("numOwners"));
+      assertEquals("CONSISTENT", locks.get("reliability"));
+
+      json = generate("locks").infinispan();
+      locks = JsonPath.read(json, jsonPath);
+      assertEquals(2, locks.get("numOwners"));
+      assertEquals("AVAILABLE", locks.get("reliability"));
+   }
+
+   void assertValue(String json, String path, Object expected) {
+      Object val = JsonPath.read(json, path);
+      assertEquals(expected, val);
+   }
+
+   void assertEmptyJsonList(String json, String path) {
+      JSONArray array = JsonPath.read(json, path);
+      assertTrue(array.isEmpty());
+   }
+
+   void assertStack(String json, String stackName, String protocolName) {
+      assertStack(json, stackName, protocolName, null);
+   }
+
+   @SuppressWarnings("unchecked")
+   void assertStack(String json, String stackName, String protocolName, Map<String, ?> properties) {
+      Map<String, ?> stack = getStack(json, stackName);
+      assertEquals(stackName, stack.get("name"));
+      Map<String, String> protocol = (Map<String, String>) stack.get(protocolName);
+      assertNotNull(protocol);
+      if (properties == null)
+         return;
+
+      for (Map.Entry<String, ?> entry : properties.entrySet()) {
+         assertEquals(entry.getValue(), protocol.get(entry.getKey()));
+      }
+   }
+
+   Map<String, ?> getStack(String json, String stackName) {
+      String jsonpath = String.format("infinispan.jgroups.stacks[*].stack[?(@.name == '%s')]", stackName);
+      return getSingleton(json, jsonpath);
+   }
+
+   @SuppressWarnings("unchecked")
+   Map<String, ?> getSingleton(String json, String jsonPath) {
+      JSONArray array = JsonPath.read(json, jsonPath);
+      assertEquals(1, array.size());
+      return (Map<String, ?>) array.get(0);
+   }
+
+   void assertStackFile(String json, String name, String path) {
+      String jsonpath = String.format("infinispan.jgroups.stackFiles[?(@.name == '%s' && @.path == '%s')]", name, path);
+      JSONArray stacks = JsonPath.read(json, jsonpath);
+      assertEquals(1, stacks.size());
    }
 
    private AbstractMainTest generateDefault() throws Exception {
@@ -499,12 +504,6 @@ abstract class AbstractMainTest {
 
    private String infinispan() throws Exception {
       return yamlAsJson(ConfigGenerator.INFINISPAN_FILE);
-   }
-
-   // TODO replace with yaml?
-   private XmlAssert logging() throws Exception {
-      String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.LOGGING_FILE));
-      return assertThat(config);
    }
 
    private String jgroupsRelay() throws Exception {

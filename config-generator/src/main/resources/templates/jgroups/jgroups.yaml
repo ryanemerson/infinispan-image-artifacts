@@ -1,3 +1,4 @@
+  # TODO update to use camelCase
   jgroups:
     stacks:
       - stack:
@@ -8,13 +9,13 @@
             bind_port: $\{jgroups.bind.port,jgroups.tcp.port:7800\}
             enable_diagnostics: {jgroups.diagnostics}
           {#if jgroups.dnsPing.query}
-            dns.DNS_PING:
-              dns_address: {jgroups.dnsPing.address}
-              dns_query: {jgroups.dnsPing.query}
-              dns_record_type: {jgroups.dnsPing.recordType}
-              stack.combine: REPLACE
-              stack.position: MPING
-          {else}
+          dns.DNS_PING:
+            dns_address: {jgroups.dnsPing.address}
+            dns_query: {jgroups.dnsPing.query}
+            dns_record_type: {jgroups.dnsPing.recordType}
+            stack.combine: REPLACE
+            stack.position: MPING
+          {#else}
           MPING:
             bind_addr: $\{jgroups.bind.address,jgroups.tcp.address:{jgroups.bindAddress}\}
           {/if}
@@ -33,7 +34,7 @@
               dns_record_type: {jgroups.dnsPing.recordType}
               stack.combine: REPLACE
               stack.position: MPING
-          {else}
+          {#else}
           MPING:
             bind_addr: $\{jgroups.bind.address,jgroups.tcp.address:{jgroups.bindAddress}\}
           {/if}
