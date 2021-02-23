@@ -1,0 +1,5 @@
+endpoints:
+  clientCert: validate
+truststore:
+  path: "/some/keystore.jks"
+  password: secret

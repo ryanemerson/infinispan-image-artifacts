@@ -85,21 +85,29 @@
         <security>
             <security-realms>
                 <security-realm name="default">
-                    {#if keystore and keystore.path}
                     <server-identities>
                         <ssl>
+                            {#if keystore and keystore.path}
                             <keystore path="{keystore.path}" alias="{keystore.alias}"
                                       keystore-password="{keystore.password}"
                                       {#if keystore.selfSignCert}generate-self-signed-certificate-host="localhost"{/if}/>
+                            {/if}
+                            {#if truststore and truststore.path}
+                            <truststore path="{truststore.path}"  password="{truststore.password}"/>
+                            {/if}
                         </ssl>
                     </server-identities>
-                    {/if}
                     {#if endpoints.auth}
+
+                    {#if endpoints.clientCert.lowerCase eq 'authenticate'}
+                    <truststore-realm/>
+                    {#else if endpoints.clientCert.lowerCase eq 'none'}
                     <properties-realm groups-attribute="Roles">
                         <user-properties path="users.properties" relative-to="infinispan.server.config.path"
                                          plain-text="true"/>
                         <group-properties path="groups.properties" relative-to="infinispan.server.config.path"/>
                     </properties-realm>
+                    {/if}
                     {/if}
                 </security-realm>
                 {#if endpoints.dedicatedAdmin}
@@ -114,7 +122,7 @@
             </security-realms>
         </security>
 
-        <endpoints socket-binding="default" security-realm="default">
+        <endpoints socket-binding="default" security-realm="default" {#if endpoints.clientCert != "none"}require-ssl-client-auth="true"{/if}>
             {#if endpoints.hotrod.enabled}
             {#if endpoints.auth}
             <hotrod-connector>

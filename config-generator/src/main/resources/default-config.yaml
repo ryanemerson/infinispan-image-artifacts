@@ -7,6 +7,7 @@ infinispan:
 endpoints:
   dedicatedAdmin: false
   auth: true
+  clientCert: none # none | validate | authenticate
   hotrod:
     enabled: true
     qop: auth
