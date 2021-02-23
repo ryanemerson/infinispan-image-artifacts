@@ -80,6 +80,34 @@ abstract class AbstractMainTest {
    }
 
    @Test
+   void testClientCertAuthenticate() throws Exception {
+      XmlAssert xml = generate("endpoints-client-cert-authenticate").infinispan();
+      testClientCert(xml, true);
+   }
+
+   @Test
+   void testClientCertValidate() throws Exception {
+      XmlAssert xml = generate("endpoints-client-cert-validate").infinispan();
+      testClientCert(xml, false);
+   }
+
+   void testClientCert(XmlAssert xml, boolean authenticate) {
+      xml.doesNotHaveXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:properties-realm");
+      xml.hasXPath("//i:infinispan/s:server/s:endpoints[@socket-binding='default'][1]").haveAttribute("require-ssl-client-auth", "true");
+      xml.hasXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:server-identities/s:ssl/s:truststore")
+            .haveAttribute("path", "/some/keystore.jks")
+            .haveAttribute("password", "secret");
+
+      String tsRealmPath = "//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:truststore-realm";
+      if (authenticate) {
+         xml.hasXPath(tsRealmPath);
+      } else {
+         xml.doesNotHaveXPath(tsRealmPath);
+      }
+   }
+
+
+   @Test
    void testRestDisabled() throws Exception {
       generate("rest-disabled")
             .infinispan()
@@ -89,6 +117,8 @@ abstract class AbstractMainTest {
    @Test
    void testAuthEnabledByDefault() throws Exception {
       XmlAssert xml = generateDefault().infinispan();
+      xml.doesNotHaveXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:truststore-realm");
+      xml.doesNotHaveXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:server-identities/s:ssl/s:trustore");
       xml.hasXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:properties-realm");
       xml.hasXPath("//i:infinispan/s:server/s:endpoints")
             .haveAttribute("security-realm");

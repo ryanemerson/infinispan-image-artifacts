@@ -202,6 +202,11 @@ public class ConfigGenerator {
    }
 
    @TemplateExtension
+   static String lowerCase(String value) {
+      return value == null ? null : value.toLowerCase();
+   }
+
+   @TemplateExtension
    static String stack(String transport) {
       return "image" + transport;
    }
