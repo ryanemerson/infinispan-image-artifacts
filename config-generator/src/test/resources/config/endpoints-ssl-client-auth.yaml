@@ -1,0 +1,5 @@
+endpoints:
+  requireSslClientAuth: true
+truststore:
+  path: "/some/keystore.jks"
+  password: secret

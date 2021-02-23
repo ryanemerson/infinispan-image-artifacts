@@ -80,6 +80,23 @@ abstract class AbstractMainTest {
    }
 
    @Test
+   void testRequireSslClientAuthDisabledByDefault() throws Exception {
+      XmlAssert xml = generateDefault().infinispan();
+      xml.doesNotHaveXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:truststore-realm");
+      xml.hasXPath("//i:infinispan/s:server/s:endpoints").haveAttribute("require-ssl-client-auth", "false");
+   }
+
+   @Test
+   void testRequireSslClientAuthEnabled() throws Exception {
+      XmlAssert xml = generate("endpoints-ssl-client-auth").infinispan();
+      xml.doesNotHaveXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:properties-realm");
+      xml.hasXPath("//i:infinispan/s:server/s:endpoints").haveAttribute("require-ssl-client-auth", "true");
+      xml.hasXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:truststore-realm")
+      .haveAttribute("path", "/some/keystore.jks")
+      .haveAttribute("keystore-password", "secret");
+   }
+
+   @Test
    void testRestAuthEnabledByDefault() throws Exception {
       XmlAssert xml = generateDefault().infinispan();
       xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector/s:authentication");

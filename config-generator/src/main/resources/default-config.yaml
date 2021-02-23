@@ -1,6 +1,7 @@
 infinispan:
   clusterName: infinispan
 endpoints:
+  requireSslClientAuth: false
   hotrod:
     auth: true
     enabled: true
