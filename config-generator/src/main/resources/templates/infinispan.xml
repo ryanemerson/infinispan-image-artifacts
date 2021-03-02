@@ -73,6 +73,9 @@
             {#if endpoints.memcached.enabled}
             <socket-binding name="memcached" port="11221"/>
             {/if}
+            {#if endpoints.dedicatedAdmin}
+            <socket-binding name="admin" port="11223"/>
+            {/if}
         </socket-bindings>
 
         <security>
@@ -95,6 +98,15 @@
                     </properties-realm>
                     {/if}
                 </security-realm>
+                {#if endpoints.dedicatedAdmin}
+                <security-realm name="admin">
+                    <properties-realm groups-attribute="Roles">
+                        <user-properties path="admin/users.properties" relative-to="infinispan.server.config.path"
+                                         plain-text="true"/>
+                        <group-properties path="admin/groups.properties" relative-to="infinispan.server.config.path"/>
+                    </properties-realm>
+                </security-realm>
+                {/if}
             </security-realms>
         </security>
 
@@ -135,5 +147,13 @@
             <memcached-connector socket-binding="memcached"/>
             {/if}
         </endpoints>
+
+        {#if endpoints.dedicatedAdmin}
+        <endpoints socket-binding="admin" security-realm="admin">
+            <rest-connector>
+                <authentication mechanisms="BASIC DIGEST"/>
+            </rest-connector>
+        </endpoints>
+        {/if}
     </server>
 </infinispan>

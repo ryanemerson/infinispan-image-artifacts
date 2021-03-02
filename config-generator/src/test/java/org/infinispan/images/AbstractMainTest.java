@@ -69,21 +69,21 @@ abstract class AbstractMainTest {
    void testMemcachedDisabledByDefault() throws Exception {
       generateDefault()
             .infinispan()
-            .doesNotHaveXPath("//i:infinispan/s:server/s:endpoints/s:memcached-connector");
+            .doesNotHaveXPath("//i:infinispan/s:server/s:endpoints[@socket-binding='default'][1]/s:memcached-connector");
    }
 
    @Test
    void testEnableMemcached() throws Exception {
       generate("memcached-enabled")
             .infinispan()
-            .hasXPath("//i:infinispan/s:server/s:endpoints/s:memcached-connector");
+            .hasXPath("//i:infinispan/s:server/s:endpoints[@socket-binding='default'][1]/s:memcached-connector");
    }
 
    @Test
    void testRestDisabled() throws Exception {
       generate("rest-disabled")
             .infinispan()
-            .doesNotHaveXPath("//i:infinispan/s:server/s:endpoints/s:rest-connector");
+            .doesNotHaveXPath("//i:infinispan/s:server/s:endpoints[@socket-binding='default'][1]/s:rest-connector");
    }
 
    @Test
@@ -92,7 +92,7 @@ abstract class AbstractMainTest {
       xml.hasXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:properties-realm");
       xml.hasXPath("//i:infinispan/s:server/s:endpoints")
             .haveAttribute("security-realm");
-      xml.hasXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector/s:authentication/s:sasl")
+      xml.hasXPath("//i:infinispan/s:server/s:endpoints[@socket-binding='default'][1]/s:hotrod-connector/s:authentication/s:sasl")
             .haveAttribute("qop", "auth")
             .haveAttribute("server-name", "infinispan");
    }
@@ -101,7 +101,7 @@ abstract class AbstractMainTest {
    void testAuthDisabled() throws Exception {
       XmlAssert xml = generate("auth-disabled").infinispan();
       xml.doesNotHaveXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:properties-realm");
-      xml.doesNotHaveXPath("//i:infinispan/s:server/s:endpoints/s:hotrod-connector/s:authentication");
+      xml.doesNotHaveXPath("//i:infinispan/s:server/s:endpoints[@socket-binding='default'][1]/s:hotrod-connector/s:authentication");
       xml.hasXPath("//i:infinispan/s:server/s:endpoints")
          .haveAttribute("security-realm");
    }
@@ -109,7 +109,7 @@ abstract class AbstractMainTest {
    @Test
    void testRestCorsRules() throws Exception {
       XmlAssert xml = generate("rest-cors-rules").infinispan();
-      String rulesPath = "//i:infinispan/s:server/s:endpoints/s:rest-connector/s:cors-rules/";
+      String rulesPath = "//i:infinispan/s:server/s:endpoints[@socket-binding='default'][1]/s:rest-connector/s:cors-rules/";
       String rule = rulesPath + "s:cors-rule[1]";
       xml.hasXPath(rule)
             .haveAttribute("name", "restrict-host1")
@@ -393,15 +393,25 @@ abstract class AbstractMainTest {
 
    @Test
    void testCredentialIdentities() throws Exception {
-      String path = new File("src/test/resources/identities", "identities.yaml").getAbsolutePath();
-      assertEquals(CommandLine.ExitCode.OK, execute(String.format("--identities=%s", path), outputDir.getAbsolutePath()));
+      testIdentities("--identities", null);
+   }
 
-      Properties userProps = loadPropertiesFile("users.properties");
+   @Test
+   void testAdminCredentialIdentities() throws Exception {
+      testIdentities("--admin-identities", "admin");
+   }
+
+   void testIdentities(String cmdOption, String subDir) throws Exception {
+      String path = new File("src/test/resources/identities", "identities.yaml").getAbsolutePath();
+      assertEquals(CommandLine.ExitCode.OK, execute(String.format("%s=%s", cmdOption, path), outputDir.getAbsolutePath()));
+
+      File propsDir = subDir == null ? outputDir : new File(outputDir, subDir);
+      Properties userProps = loadPropertiesFile("users.properties", propsDir);
       assertEquals(2, userProps.size());
       assertEquals("pass", userProps.get("user1"));
       assertEquals("pass", userProps.get("user2"));
 
-      Properties groupProps = loadPropertiesFile("groups.properties");
+      Properties groupProps = loadPropertiesFile("groups.properties", propsDir);
       assertEquals(2, groupProps.size());
       assertEquals("admin,rockstar", groupProps.get("user1"));
       assertEquals("non-admin", groupProps.get("user2"));
@@ -431,6 +441,16 @@ abstract class AbstractMainTest {
             .hasXPath("//i:infinispan/i:cache-container/cl:clustered-locks")
             .haveAttribute("num-owners", "2")
             .haveAttribute("reliability", "AVAILABLE");
+   }
+
+   @Test
+   void testAdminEndpointEnabled() throws Exception {
+      XmlAssert infinispan = generate("admin-endpoint").infinispan();
+      infinispan.hasXPath("//i:infinispan/s:server/s:socket-bindings/s:socket-binding[@name='admin'][1]")
+            .haveAttribute("port", "11223");
+
+      infinispan.hasXPath("//i:infinispan/s:server/s:endpoints[@socket-binding='admin' and @security-realm='admin'][1]/s:rest-connector/s:authentication")
+      .haveAttribute("mechanisms", "BASIC DIGEST");
    }
 
    MultipleNodeAssert assertStack(XmlAssert xml, String path) {
@@ -493,7 +513,7 @@ abstract class AbstractMainTest {
       return assertThat(config).withNamespaceContext(prefix2Uri);
    }
 
-   private static Properties loadPropertiesFile(String name) throws Exception {
+   private static Properties loadPropertiesFile(String name, File outputDir) throws Exception {
       Properties properties = new Properties();
       File propsFile = new File(outputDir, name);
       try (Reader reader = Files.newBufferedReader(propsFile.toPath())) {

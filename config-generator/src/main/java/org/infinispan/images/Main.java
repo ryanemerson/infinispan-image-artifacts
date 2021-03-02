@@ -42,6 +42,12 @@ public class Main implements QuarkusApplication {
       )
       File identities;
 
+      @Option(
+            names = {"--admin-identities"},
+            description = {"Yaml file used to initialize admin identities"}
+      )
+      File adminIdentities;
+
       @Parameters(
             index = "0",
             description = {"The directory where the generated files will be saved"},
@@ -54,6 +60,7 @@ public class Main implements QuarkusApplication {
          try {
             configGenerator.process(server, outputDir);
             identitiesGenerator.process(identities, outputDir);
+            identitiesGenerator.process(adminIdentities, new File(outputDir, "admin"));
             return CommandLine.ExitCode.OK;
          } catch (FileNotFoundException e) {
             e.printStackTrace(System.err);
