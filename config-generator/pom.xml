@@ -11,10 +11,9 @@
     <artifactId>config-generator</artifactId>
     <properties>
         <quarkus.package.type>uber-jar</quarkus.package.type>
-        <version.assertj>3.14.0</version.assertj>
         <version.bytebuddy>1.10.0</version.bytebuddy>
         <version.quarkus>1.7.6.Final</version.quarkus>
-        <version.xmlunit>2.6.4</version.xmlunit>
+        <version.xmlunit>2.8.2</version.xmlunit>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -54,12 +53,6 @@
             <artifactId>byte-buddy</artifactId>
             <version>${version.bytebuddy}</version>
             <scope>test</scope>
-        </dependency>
-        <!-- Explicitly define assertj version to fix XMlUnit issue https://github.com/xmlunit/xmlunit/issues/181-->
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>${version.assertj}</version>
         </dependency>
         <dependency>
             <groupId>org.xmlunit</groupId>
