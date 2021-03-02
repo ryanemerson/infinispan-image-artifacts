@@ -5,6 +5,7 @@ infinispan:
     owners: -1
     reliability: consistent
 endpoints:
+  dedicatedAdmin: false
   auth: true
   hotrod:
     enabled: true

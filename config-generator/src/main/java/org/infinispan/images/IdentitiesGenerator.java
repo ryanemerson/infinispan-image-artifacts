@@ -20,6 +20,7 @@ class IdentitiesGenerator {
       if (identitiesConfig == null)
          return;
 
+      outputDir.mkdirs();
       Map<String, Object> userConfig = loadYaml(identitiesConfig);
       processCredentials(get(userConfig, "credentials"), outputDir);
    }
