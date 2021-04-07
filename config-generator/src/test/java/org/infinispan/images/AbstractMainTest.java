@@ -453,6 +453,47 @@ abstract class AbstractMainTest {
       .haveAttribute("mechanisms", "BASIC DIGEST");
    }
 
+   @Test
+   void testCloudEventsDisabledByDefault() throws Exception {
+      XmlAssert xml = generateDefault().infinispan();
+      String path = "//i:infinispan/i:cache-container/ce:cloudevents";
+      xml.doesNotHaveXPath(path);
+   }
+
+   @Test
+   void testCloudEventsProvided() throws Exception {
+      // Generate Yaml config so we can set the absolute path of the provided keystore
+      String yaml =
+            "cloudEvents:\n"+
+            "  bootstrapServers: 127.0.0.1:9092,192.168.1.14:9092";
+      writeYamlAndGenerate(yaml, "cloudevent-provided");
+      XmlAssert xml = infinispan();
+
+      String path = "//i:infinispan/i:cache-container/ce:cloudevents";
+      xml.hasXPath(path)
+            .haveAttribute("bootstrap-servers", "127.0.0.1:9092,192.168.1.14:9092")
+            .doNotHaveAttribute("acks")
+            .doNotHaveAttribute("cache-entries-topic");
+   }
+
+   @Test
+   void testCloudEventsOnlyBootstrapProvided() throws Exception {
+      // Generate Yaml config so we can set the absolute path of the provided keystore
+      String yaml =
+            "cloudEvents:\n"+
+            "  bootstrapServers: 127.0.0.1:9092,192.168.1.14:9092\n"+
+            "  acks: \"1\"\n"+
+            "  cacheEntriesTopic: target-topic";
+      writeYamlAndGenerate(yaml, "cloudevent-provided");
+      XmlAssert xml = infinispan();
+
+      String path = "//i:infinispan/i:cache-container/ce:cloudevents";
+      xml.hasXPath(path)
+            .haveAttribute("bootstrap-servers", "127.0.0.1:9092,192.168.1.14:9092")
+            .haveAttribute("acks", "1")
+            .haveAttribute("cache-entries-topic","target-topic");
+   }
+
    MultipleNodeAssert assertStack(XmlAssert xml, String path) {
       return assertStack(xml, "image-tcp", path);
    }
@@ -494,6 +535,7 @@ abstract class AbstractMainTest {
       prefix2Uri.put("cl", "urn:infinispan:config:clustered-locks:12.0");
       prefix2Uri.put("s", "urn:infinispan:server:12.0");
       prefix2Uri.put("j", "urn:org:jgroups");
+      prefix2Uri.put("ce", "urn:infinispan:config:cloudevents:12.0");
       return assertThat(config).withNamespaceContext(prefix2Uri);
    }
 
