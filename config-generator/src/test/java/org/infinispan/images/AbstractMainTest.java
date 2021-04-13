@@ -561,11 +561,11 @@ abstract class AbstractMainTest {
    private XmlAssert infinispan() throws Exception {
       String config = Files.readString(Paths.get(outputDir.getAbsolutePath(), ConfigGenerator.INFINISPAN_FILE));
       Map<String, String> prefix2Uri = new HashMap<>();
-      prefix2Uri.put("i", "urn:infinispan:config:12.0");
-      prefix2Uri.put("cl", "urn:infinispan:config:clustered-locks:12.0");
-      prefix2Uri.put("s", "urn:infinispan:server:12.0");
+      prefix2Uri.put("i", "urn:infinispan:config:12.1");
+      prefix2Uri.put("cl", "urn:infinispan:config:clustered-locks:12.1");
+      prefix2Uri.put("s", "urn:infinispan:server:12.1");
       prefix2Uri.put("j", "urn:org:jgroups");
-      prefix2Uri.put("ce", "urn:infinispan:config:cloudevents:12.0");
+      prefix2Uri.put("ce", "urn:infinispan:config:cloudevents:12.1");
       return assertThat(config).withNamespaceContext(prefix2Uri);
    }
 
