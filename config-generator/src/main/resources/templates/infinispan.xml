@@ -1,14 +1,14 @@
 <infinispan
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="urn:infinispan:config:12.0 https://infinispan.org/schemas/infinispan-config-12.0.xsd
-                            urn:infinispan:server:12.0 https://infinispan.org/schemas/infinispan-server-12.0.xsd
-                            urn:infinispan:config:clustered-locks:12.0 https://infinispan.org/schemas/infinispan-clustered-locks-config-12.0.xsd
+        xsi:schemaLocation="urn:infinispan:config:12.1 https://infinispan.org/schemas/infinispan-config-12.1.xsd
+                            urn:infinispan:server:12.1 https://infinispan.org/schemas/infinispan-server-12.1.xsd
+                            urn:infinispan:config:clustered-locks:12.1 https://infinispan.org/schemas/infinispan-clustered-locks-config-12.1.xsd
                             urn:org:jgroups http://www.jgroups.org/schema/jgroups-4.2.xsd
-                            urn:infinispan:config:cloudevents:12.0 https://infinispan.org/schemas/infinispan-cloudevents-config-12.0.xsd"
-        xmlns="urn:infinispan:config:12.0"
-        xmlns:server="urn:infinispan:server:12.0"
-        xmlns:locks="urn:infinispan:config:clustered-locks:12.0"
-        xmlns:ce="urn:infinispan:config:cloudevents:12.0">
+                            urn:infinispan:config:cloudevents:12.1 https://infinispan.org/schemas/infinispan-cloudevents-config-12.1.xsd"
+        xmlns="urn:infinispan:config:12.1"
+        xmlns:server="urn:infinispan:server:12.1"
+        xmlns:locks="urn:infinispan:config:clustered-locks:12.1"
+        xmlns:ce="urn:infinispan:config:cloudevents:12.1">
 
     <jgroups>
         <stack name="image-tcp" extends="tcp">
@@ -65,7 +65,7 @@
         <locks:clustered-locks num-owners="{infinispan.locks.owners}" reliability="{infinispan.locks.reliability.upperCase}"/>
     </cache-container>
 
-    <server xmlns="urn:infinispan:server:12.0">
+    <server xmlns="urn:infinispan:server:12.1">
         <interfaces>
             <interface name="public">
                 <inet-address value="$\{infinispan.bind.address:0.0.0.0\}"/>
