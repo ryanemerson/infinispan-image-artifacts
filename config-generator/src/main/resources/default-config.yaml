@@ -1,4 +1,7 @@
 infinispan:
+  authorization:
+    enabled: true
+    roleMapper: cluster
   clusterName: infinispan
   zeroCapacityNode: false
   locks:

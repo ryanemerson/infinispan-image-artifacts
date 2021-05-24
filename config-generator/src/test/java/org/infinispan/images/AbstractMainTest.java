@@ -115,6 +115,32 @@ abstract class AbstractMainTest {
    }
 
    @Test
+   void testAuthorizationEnabledByDefault() throws Exception {
+      XmlAssert xml = generateDefault().infinispan();
+      xml.hasXPath("//i:infinispan/i:cache-container/i:security/i:authorization/i:cluster-role-mapper");
+   }
+
+   @Test
+   void testAuthorizationCommonNameRoleMapper() throws Exception {
+      XmlAssert xml = generate("authorization-common-name").infinispan();
+      xml.hasXPath("//i:infinispan/i:cache-container/i:security/i:authorization/i:common-name-role-mapper");
+   }
+
+   @Test
+   void testAuthorizationDisabled() throws Exception {
+      XmlAssert xml = generate("authorization-disabled").infinispan();
+      xml.doesNotHaveXPath("//i:infinispan/i:cache-container/i:security");
+   }
+
+   @Test
+   void testAuthorizationRoles() throws Exception {
+      XmlAssert xml = generate("authorization-roles").infinispan();
+      xml.hasXPath("//i:infinispan/i:cache-container/i:security/i:authorization/i:role[@name='test-role'][1]").haveAttribute("permissions", "ALL");
+      xml.hasXPath("//i:infinispan/i:cache-container/i:security/i:authorization/i:role[@name='test-role2'][1]").haveAttribute("permissions", "READ WRITE");
+   }
+
+
+   @Test
    void testAuthEnabledByDefault() throws Exception {
       XmlAssert xml = generateDefault().infinispan();
       xml.doesNotHaveXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:truststore-realm");

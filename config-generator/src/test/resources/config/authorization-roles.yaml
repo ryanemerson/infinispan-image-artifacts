@@ -1,0 +1,10 @@
+infinispan:
+  authorization:
+    roles:
+      - name: test-role
+        permissions:
+          - ALL
+      - name: test-role2
+        permissions:
+          - READ
+          - WRITE

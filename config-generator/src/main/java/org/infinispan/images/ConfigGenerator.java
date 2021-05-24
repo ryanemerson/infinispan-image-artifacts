@@ -212,6 +212,11 @@ public class ConfigGenerator {
    }
 
    @TemplateExtension
+   static String listAsString(List<String> list) {
+      return String.join(" ", list);
+   }
+
+   @TemplateExtension
    static RawString listElement(List<String> list, String elementName) {
       String element = list == null || list.isEmpty() ? "" :
             String.format("<%1$s>%2$s</%1$s>", elementName, String.join(",", list));
