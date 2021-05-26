@@ -44,3 +44,5 @@ logging:
     com.arjuna: warn
     org.infinispan: info
     org.jgroups: warn
+    # No need to warn about not being able to TLS/SSL handshake
+    io.netty.handler.ssl.ApplicationProtocolNegotiationHandler: error

@@ -187,7 +187,8 @@ abstract class AbstractMainTest {
       assertLogger(xml, 1, "com.arjuna", "WARN");
       assertLogger(xml, 2, "org.infinispan", "DEBUG");
       assertLogger(xml, 3, "org.jgroups", "WARN");
-      assertLogger(xml, 4, "org.infinispan.commands", "TRACE");
+      assertLogger(xml, 4, "io.netty.handler.ssl.ApplicationProtocolNegotiationHandler", "ERROR");
+      assertLogger(xml, 5, "org.infinispan.commands", "TRACE");
    }
 
    void assertLogger(XmlAssert xml, int index, String category, String level) {
