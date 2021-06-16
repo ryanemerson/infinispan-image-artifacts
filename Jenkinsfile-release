@@ -9,7 +9,7 @@ pipeline {
         string(name: 'version', defaultValue: '', description: 'Release version')
         string(name: 'nextVersion', defaultValue: '', description: 'Next working version')
         booleanParam(name: 'dryRun', defaultValue: false, description: 'If true, we don\'t deploy to nexus')
-        gitParameter(name: 'branch', defaultValue: 'origin/master', branchFilter: 'origin/(.*)', type: 'PT_BRANCH', description: 'Branch to release from')
+        gitParameter(name: 'branch', defaultValue: 'origin/main', branchFilter: 'origin/(.*)', type: 'PT_BRANCH', description: 'Branch to release from')
     }
 
     stages {
