@@ -14,7 +14,9 @@
         <stack name="image-tcp" extends="tcp">
             <TCP bind_addr="$\{jgroups.bind.address,jgroups.tcp.address:{jgroups.bindAddress}\}"
                  bind_port="$\{jgroups.bind.port,jgroups.tcp.port:7800\}"
-                 enable_diagnostics="{jgroups.diagnostics}"/>
+                 enable_diagnostics="{jgroups.diagnostics}"
+                 port_range="0"
+            />
 
             {#if jgroups.dnsPing.query}
             <dns.DNS_PING dns_address="{jgroups.dnsPing.address}" dns_query="{jgroups.dnsPing.query}"
