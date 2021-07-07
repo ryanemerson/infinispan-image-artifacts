@@ -4,8 +4,8 @@
 >
 
     {#if 'TUNNEL' == xsite.transport.upperCase()}
-    <TUNNEL bind_addr="{jgroups.bindAddress}"
-            bind_port="7900"
+    <TUNNEL bind_addr="$\{jgroups.relay.bind.address:{jgroups.bindAddress}\}"
+            bind_port="$\{jgroups.relay.bind.port:{jgroups.relay.bindPort}\}"
             enable_diagnostics="{jgroups.diagnostics}"
             port_range="0"
             gossip_router_hosts="{xsite.address}[{xsite.port}],{remoteSites}"
@@ -13,8 +13,8 @@
 
     <PING return_entire_cache="true"/>
     {#else}
-    <TCP bind_addr="{jgroups.bindAddress}"
-         bind_port="7900"
+    <TCP bind_addr="$\{jgroups.relay.bind.address:{jgroups.bindAddress}\}"
+         bind_port="$\{jgroups.relay.bind.port:{jgroups.relay.bindPort}\}"
          enable_diagnostics="{jgroups.diagnostics}"
          external_addr="{xsite.address}"
          external_port="{xsite.port}"

@@ -13,7 +13,7 @@
     <jgroups>
         <stack name="image-tcp" extends="tcp">
             <TCP bind_addr="$\{jgroups.bind.address,jgroups.tcp.address:{jgroups.bindAddress}\}"
-                 bind_port="$\{jgroups.bind.port,jgroups.tcp.port:7800\}"
+                 bind_port="$\{jgroups.bind.port,jgroups.tcp.port:{jgroups.bindPort}\}"
                  enable_diagnostics="{jgroups.diagnostics}"
                  port_range="0"
             />

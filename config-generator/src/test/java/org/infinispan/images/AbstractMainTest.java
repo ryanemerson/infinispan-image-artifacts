@@ -249,11 +249,13 @@ abstract class AbstractMainTest {
    }
 
    private void testJGroupsTcp(boolean diagnosticsEnabled) throws Exception {
-      XmlAssert xml = generate("jgroups-diagnostics-tcp").infinispan();
+      XmlAssert xml = generate(diagnosticsEnabled ? "jgroups-diagnostics-tcp" : "jgroups-diagnostics-disabled-tcp").infinispan();
       String bindProperty = String.format("${jgroups.bind.address,jgroups.tcp.address:%s}", InetAddress.getLocalHost().getHostAddress());
       assertStack(xml, "i:TCP")
-            .haveAttribute("enable_diagnostics", Boolean.toString(true))
-            .haveAttribute("bind_addr", bindProperty);
+            .haveAttribute("enable_diagnostics", Boolean.toString(diagnosticsEnabled))
+            .haveAttribute("bind_addr", bindProperty)
+            .haveAttribute("bind_port", "${jgroups.bind.port,jgroups.tcp.port:7800}")
+            .haveAttribute("port_range", "0");
       assertStack(xml, "i:MPING");
    }
 
@@ -327,9 +329,14 @@ abstract class AbstractMainTest {
             .haveAttribute("site", "LON");
 
       XmlAssert relay = jgroupsRelay();
+      String bindProperty = String.format("${jgroups.relay.bind.address:%s}", InetAddress.getLocalHost().getHostAddress());
       relay.hasXPath("//j:config/j:TCP")
+            .haveAttribute("bind_addr", bindProperty)
+            .haveAttribute("bind_port", "${jgroups.relay.bind.port:7900}")
             .haveAttribute("external_addr", "lon-addr")
-            .haveAttribute("external_port", "7200");
+            .haveAttribute("external_port", "7200")
+            .haveAttribute("port_range", "0")
+            .haveAttribute("enable_diagnostics", Boolean.toString(false));
 
       relay.hasXPath("//j:config/j:TCPPING")
             .haveAttribute("initial_hosts", "lon-addr[7200],nyc-addr[7200]");
@@ -444,8 +451,13 @@ abstract class AbstractMainTest {
             .haveAttribute("name", "NYC");
 
       XmlAssert relay = jgroupsRelay();
+      String bindProperty = String.format("${jgroups.relay.bind.address:%s}", InetAddress.getLocalHost().getHostAddress());
       relay.hasXPath("//j:config/j:TUNNEL")
-            .haveAttribute("gossip_router_hosts", "lon-addr[7200],nyc-addr[7200]");
+            .haveAttribute("gossip_router_hosts", "lon-addr[7200],nyc-addr[7200]")
+            .haveAttribute("bind_addr", bindProperty)
+            .haveAttribute("bind_port", "${jgroups.relay.bind.port:7900}")
+            .haveAttribute("port_range", "0")
+            .haveAttribute("enable_diagnostics", Boolean.toString(false));
    }
 
    @Test

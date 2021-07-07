@@ -23,9 +23,12 @@ jgroups:
   diagnostics: false
   encrypt: false
   transport: tcp
+  bindPort: 7800
   dnsPing:
     address: ""
     recordType: A
+  relay:
+    bindPort: 7900
 keystore:
   alias: server
   selfSignCert: false
