@@ -82,17 +82,18 @@ abstract class AbstractMainTest {
    @Test
    void testClientCertAuthenticate() throws Exception {
       XmlAssert xml = generate("endpoints-client-cert-authenticate").infinispan();
+      xml.doesNotHaveXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:properties-realm");
       testClientCert(xml, true);
    }
 
    @Test
    void testClientCertValidate() throws Exception {
       XmlAssert xml = generate("endpoints-client-cert-validate").infinispan();
+      xml.hasXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:properties-realm");
       testClientCert(xml, false);
    }
 
    void testClientCert(XmlAssert xml, boolean authenticate) {
-      xml.doesNotHaveXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:properties-realm");
       xml.hasXPath("//i:infinispan/s:server/s:endpoints[@socket-binding='default'][1]").haveAttribute("require-ssl-client-auth", "true");
       xml.hasXPath("//i:infinispan/s:server/s:security/s:security-realms/s:security-realm[@name='default']/s:server-identities/s:ssl/s:truststore")
             .haveAttribute("path", "/some/keystore.jks")

@@ -119,7 +119,7 @@
 
                     {#if endpoints.clientCert.lowerCase eq 'authenticate'}
                     <truststore-realm/>
-                    {#else if endpoints.clientCert.lowerCase eq 'none'}
+                    {#else}
                     <properties-realm groups-attribute="Roles">
                         <user-properties path="users.properties" relative-to="infinispan.server.config.path"
                                          plain-text="true"/>
